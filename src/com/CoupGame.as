@@ -17,6 +17,8 @@ package com
 			Debug.message(Debug.INFO, "Init CoupGame");
 			
 			stateManager = StateManager.getInstance();
+			addChild(stateManager);
+			stateManager.initialize();
 			stateManager.Add(new GameState(), StatesConstants.GAME_STATE, true);
 		}
 	}

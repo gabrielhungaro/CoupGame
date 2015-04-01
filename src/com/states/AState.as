@@ -1,6 +1,8 @@
 package com.states
 {
-	public class AState
+	import flash.display.Sprite;
+
+	public class AState extends Sprite
 	{
 		private var name:String;
 		private var id:int;
