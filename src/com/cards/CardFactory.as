@@ -110,24 +110,16 @@ package com.cards
 					_randomArray.push(_tempArray[_randomIndex]);
 					_tempArray[_randomIndex] = null;
 				}
-				/*while(_tempArray[_randomIndex] == null && _randomArray.length < _tempArray.length){
-					_randomIndex = Math.ceil(Math.random() * _tempArray.length);
-				}
-				_randomArray.push(_tempArray[_randomIndex]);
-				_tempArray[_randomIndex] = null;*/
 			}
 			
 			//vectorOfRandomCards = new Vector.<ACard>();
 		}
 		
-		private function verifyExistsIndex(_array:Array):int
+		private function verifyExistsIndex(_array:Array, _randomArray:Array):int
 		{
-			var randomInt:int;
-			if(_array[_index] == null){
-				_randomIndex = Math.ceil(Math.random() * _array.length);
-			}else{
-				_randomArray.push(_tempArray[_randomIndex]);
-				_tempArray[_randomIndex] = null;
+			var randomInt:int = Math.ceil(Math.random() * _array.length);
+			if(_array[randomInt] == null && _refArray.lenght < _array.length){
+				verifyExistsIndex(_array);
 			}
 			return randomInt;
 		}
