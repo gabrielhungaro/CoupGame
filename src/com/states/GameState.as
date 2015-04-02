@@ -30,6 +30,7 @@ package com.states
 			cardFactory = new CardFactory();
 			cardFactory.onCompleteXmlLoad.addOnce(onCompleteLoadXMLCards);
 			cardFactory.initialize();
+			addChild(cardFactory);
 		}
 		
 		private function addLoaderScreen():void

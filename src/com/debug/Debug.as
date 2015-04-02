@@ -19,7 +19,8 @@ package com.debug
 			if(debbugin){
 				switch(_type){
 					case ERROR:
-						throw new Error(ERROR + _message);
+						trace(_type, _message);
+						//throw new Error(ERROR + _message);
 						break;
 					default:
 						trace(_type, _message);

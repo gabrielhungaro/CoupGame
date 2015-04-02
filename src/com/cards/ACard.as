@@ -1,15 +1,25 @@
 package com.cards
 {
+	import com.debug.Debug;
+	
+	import flash.display.Bitmap;
+	import flash.display.Loader;
 	import flash.display.Sprite;
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.net.URLRequest;
 
-	public class ACard
+	public class ACard extends Sprite
 	{
 		private var name:String;
 		private var description:String;
 		private var id:int
-		private var image:Sprite;
+		//private var image:Sprite;
+		private var imagePath:String;
 		private var canUseAbility:Boolean;
 		private var coinsToBuy:int;
+		private var loader:Loader;
+		private var image:Bitmap;
 		
 		public function ACard()
 		{
@@ -19,14 +29,47 @@ package com.cards
 		{
 			canUseAbility = true;
 			coinsToBuy = 1;
+			
+			loadImage();
+		}
+		
+		private function loadImage():void
+		{
+			Debug.message(Debug.METHOD, "loadImage - " + imagePath);
+			loader = new Loader();
+			loader.load(new URLRequest(imagePath));
+			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onCompleteImageLoadHandler);
+			loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onErrorHandler);
+		}
+		
+		protected function onCompleteImageLoadHandler(event:Event):void
+		{
+			Debug.message(Debug.INFO, "[ CARD ] - " + name + " onCompleteImageLoadHandler");
+			image = Bitmap(loader.content);
+			addChild(image);
+		}
+		
+		protected function onErrorHandler(event:IOErrorEvent):void
+		{
+			Debug.message(Debug.ERROR, event.text);
+		}
+		
+		public function getImagePath():String
+		{
+			return imagePath;
+		}
+		
+		public function setImagePath(value:String):void
+		{
+			imagePath = value;
 		}
 
-		public function getImage():Sprite
+		public function getImage():Bitmap
 		{
 			return image;
 		}
 
-		public function setImage(value:Sprite):void
+		public function setImage(value:Bitmap):void
 		{
 			image = value;
 		}
