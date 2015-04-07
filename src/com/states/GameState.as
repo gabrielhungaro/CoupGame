@@ -1,6 +1,10 @@
 package com.states
 {
+	import com.cards.ACard;
 	import com.cards.CardFactory;
+	import com.core.APlayer;
+	import com.core.Game;
+	import com.core.PlayerFactory;
 	import com.debug.Debug;
 	
 	import flash.display.MovieClip;
@@ -11,6 +15,11 @@ package com.states
 	{
 		private var cardFactory:CardFactory;
 		private var loaderScreen:Sprite;
+		private var game:Game;
+		private var playerFactory:PlayerFactory;
+		private var vectorOfPlayers:Vector.<APlayer>;
+		private var vectorOfCards:Vector.<ACard>;
+		private var cardsDistributed:int;
 		
 		public function GameState()
 		{
@@ -21,14 +30,17 @@ package com.states
 		public override function initialize():void
 		{
 			super.initialize();
+			game = Game.getInstance();
 			Debug.message(Debug.METHOD, "initialize " + StatesConstants.GAME_STATE);
 			
 			addLoaderScreen();
 			
-			
+			playerFactory = new PlayerFactory();
+			playerFactory.initialize(Game.getNumberOfPlayers());
+			vectorOfPlayers = playerFactory.getVectorOfPlayers();
 			
 			cardFactory = new CardFactory();
-			cardFactory.onCompleteXmlLoad.addOnce(onCompleteLoadXMLCards);
+			cardFactory.onCompleteLoadCards.addOnce(onCompleteLoadCards);
 			cardFactory.initialize();
 			addChild(cardFactory);
 		}
@@ -57,10 +69,37 @@ package com.states
 			initGame();
 		}
 		
-		private function onCompleteLoadXMLCards():void
+		private function onCompleteLoadCards():void
 		{
 			Debug.message(Debug.INFO, "onCompleteLoadXMLCards - GameState");
+			vectorOfCards = cardFactory.getVectorOfRandomCards().concat();
 			removeLoadScreen();
+			distributeCards();
+		}
+		
+		private function distributeCards():void
+		{
+			// TODO Auto Generated method stub
+			while(cardsDistributed < Game.getNumberOfCardsPerPlayer()){
+				cardsDistributed++;
+				for (var i:int = 0; i <= Game.getNumberOfPlayers(); i++) 
+				{
+					vectorOfPlayers[i].addCard(vectorOfCards[i]);
+				}
+			}
+			showPlayersCards();
+		}
+		
+		private function showPlayersCards():void
+		{
+			for (var i:int = 0; i < vectorOfPlayers.length; i++) 
+			{
+				trace("======================");
+				trace("name: " + vectorOfPlayers[i].getName());
+				trace("cards: " + vectorOfPlayers[i].getVectorOfCards());
+				trace("coins: " + vectorOfPlayers[i].getCoins());
+				trace("======================");
+			}
 		}
 		
 		private function initGame():void

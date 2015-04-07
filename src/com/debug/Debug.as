@@ -7,6 +7,7 @@ package com.debug
 		public static const ERROR:String =	"[ ERROR ] - ";
 		public static const METHOD:String =	"[ METHOD ] - ";
 		public static const STATE:String =	"[ STATE ] - ";
+		public static const ALERT:String =	"[ ALERT ] - ";
 		
 		public static var debbugin:Boolean = true; 
 		
@@ -28,6 +29,11 @@ package com.debug
 				}
 				
 			}
+		}
+		
+		public static function Alert(_message:String):void
+		{
+			message(ALERT, _message);
 		}
 	}
 }

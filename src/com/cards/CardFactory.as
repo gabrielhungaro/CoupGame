@@ -15,13 +15,13 @@ package com.cards
 		private var xmlLoader:URLLoader;
 		private var xml:XML;
 		private var xmlPath:String = "../lib/cards.xml";
-		public var onCompleteXmlLoad:Signal = new Signal();
+		public var onCompleteLoadCards:Signal = new Signal();
 		private var vectorOfCards:Vector.<ACard>;
 		private var totalOfCards:int;
 		private var numberOfEqualsCards:int = 3;
 		private var sourcePath:String;
 		private var poolCreated:Boolean;
-		private var vectorOfRandomCards:Object;
+		private var vectorOfRandomCards:Vector.<ACard>;;
 		
 		public function CardFactory()
 		{
@@ -33,7 +33,7 @@ package com.cards
 		public function initialize(completeCallback:Function = null):void
 		{
 			if(completeCallback !=null){
-				onCompleteXmlLoad.addOnce(completeCallback);
+				onCompleteLoadCards.addOnce(completeCallback);
 			}
 			loadXML();
 		}
@@ -51,7 +51,6 @@ package com.cards
 			xml = new XML(event.target.data);
 			sourcePath = xml.@sourcePath;
 			totalOfCards = xml.CARD.length();
-			onCompleteXmlLoad.dispatch();
 			createPoolOfCards();
 		}
 		
@@ -78,8 +77,9 @@ package com.cards
 				}
 			}
 			
+			vectorOfRandomCards = randomizeCards(vectorOfCards);
 			poolCreated = true;
-			randomizeCards();
+			onCompleteLoadCards.dispatch();
 		}
 		
 		private function createCard(_name:String, _id:int, _desc:String, _img:String):void
@@ -94,34 +94,42 @@ package com.cards
 			addChild(card);
 		}
 		
-		private function randomizeCards():void
+		private function randomizeCards(_array:Vector.<ACard> = null):Vector.<ACard>
 		{
-			var teste1:Array = ["A", "Z", "G", "0", "P", "B"];
-			var _tempArray:Array = teste1.concat();
-			var _randomArray:Array = [];
+			var _tempArray:Vector.<ACard> = _array.concat();
+			var _randomArray:Vector.<ACard> = new Vector.<ACard>();
 			var _randomIndex:int;
 			
 			for(var i:int = 0; i < _tempArray.length; i++){
-				_randomIndex = Math.ceil(Math.random() * _tempArray.length);
-				trace("TESTE: " + _tempArray[_randomIndex]);
-				if(_tempArray[_randomIndex] == null){
-					_randomIndex = Math.ceil(Math.random() * _tempArray.length);
-				}else{
+				if(_randomArray.length < _array.length){
+					_randomIndex = getRandomIndexInArray(_tempArray);
 					_randomArray.push(_tempArray[_randomIndex]);
 					_tempArray[_randomIndex] = null;
+					_tempArray.slice(_randomIndex, 0);
 				}
 			}
-			
-			//vectorOfRandomCards = new Vector.<ACard>();
+			return _randomArray;
 		}
 		
-		private function verifyExistsIndex(_array:Array, _randomArray:Array):int
+		private function getRandomIndexInArray(_array:Vector.<ACard>):int
 		{
-			var randomInt:int = Math.ceil(Math.random() * _array.length);
-			if(_array[randomInt] == null && _refArray.lenght < _array.length){
-				verifyExistsIndex(_array);
+			var randomInt:int = Math.floor(Math.random() * _array.length);
+			if(_array[randomInt] != null || _array[randomInt] != undefined){
+				return randomInt;
 			}
+			randomInt = getRandomIndexInArray(_array);
 			return randomInt;
 		}
+
+		public function getVectorOfRandomCards():Vector.<ACard>
+		{
+			return vectorOfRandomCards;
+		}
+
+		public function setVectorOfRandomCards(value:Vector.<ACard>):void
+		{
+			vectorOfRandomCards = value;
+		}
+
 	}
 }
