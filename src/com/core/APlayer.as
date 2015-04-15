@@ -13,6 +13,7 @@ package com.core
 		private var vectorOfCards:Vector.<ACard>;
 		private var coins:int;
 		private var isAI:Boolean;
+		private var vectorOfActions:Vector.<String>
 		
 		public function APlayer()
 		{
@@ -21,6 +22,13 @@ package com.core
 		public function initialize():void
 		{
 			vectorOfCards = new Vector.<ACard>();
+			vectorOfActions = new Vector.<String>();
+			vectorOfActions.push(Game.ACTION_CARD);
+			vectorOfActions.push(Game.ACTION_ACCEPT);
+			vectorOfActions.push(Game.ACTION_QUERY);
+			vectorOfActions.push(Game.ACTION_INCOME);
+			vectorOfActions.push(Game.ACTION_FOREIGN_AID);
+			vectorOfActions.push(Game.ACTION_COUP);
 		}
 		
 		public function addCard(_card:ACard):void
@@ -35,7 +43,12 @@ package com.core
 				Debug.message(Debug.ERROR, "objeto carta é nulo");
 			}
 		}
-
+		
+		public function sortAction():void
+		{
+		
+		}
+		
 		public function getName():String
 		{
 			return name;

@@ -118,8 +118,11 @@ package com.states
 		
 		private function sortPlayerTurn():void
 		{
-			var player:int = Math.floor(Math.random() * vectorOfPlayers.length);
-			trace("player turn: " + player + " " + vectorOfPlayers[player].getName());
+			var playerId:int = Math.floor(Math.random() * vectorOfPlayers.length);
+			trace("player turn: " + playerId + " " + vectorOfPlayers[playerId].getName());
+			if(vectorOfPlayers[playerId].getIsAI()){
+				Debug.message(Debug.INFO, "Player: " + vectorOfPlayers[playerId].getName() + " || is AI");
+			}
 		}
 		
 		public override function update():void

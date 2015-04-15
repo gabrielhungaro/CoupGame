@@ -33,6 +33,7 @@ package com.core
 				AIplayer.setName("AI Player" + i);
 				AIplayer.setLifes(Game.getNumberOfCardsPerPlayer());
 				AIplayer.setCoins(Game.getInitialCoins());
+				AIplayer.setIsAI(true);
 				AIplayer.initialize();
 				addChild(AIplayer);
 				vectorOfPlayers.push(AIplayer);
@@ -41,11 +42,12 @@ package com.core
 		
 		private function createPlayerUser():void
 		{
-			player = new APlayer();
+			player = new Player();
 			player.setName("macaco");
 			player.setLifes(Game.getNumberOfCardsPerPlayer());
 			player.setCoins(Game.getInitialCoins());
 			player.initialize();
+			player.setIsAI(false);
 			addChild(player);
 			vectorOfPlayers.push(player);
 			Game.setPlayer(player);

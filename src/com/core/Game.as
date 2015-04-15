@@ -11,6 +11,13 @@ package com.core
 		private static var initialCoins:int = 2;
 		private static var player:APlayer;
 		
+		public static const ACTION_CARD:String = "actionCard";
+		public static const ACTION_ACCEPT:String = "actionAccept";
+		public static const ACTION_QUERY:String = "actionQuery";
+		public static const ACTION_INCOME:String = "actionIncome";
+		public static const ACTION_FOREIGN_AID:String = "actionForeignAid";
+		public static const ACTION_COUP:String = "actionCoup";
+		
 		public function Singleton():void{
 			if(_instance){
 				Debug.message(Debug.ERROR, "Singleton... use getInstance()");
