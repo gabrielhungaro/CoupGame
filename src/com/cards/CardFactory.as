@@ -94,7 +94,7 @@ package com.cards
 			addChild(card);
 		}
 		
-		private function randomizeCards(_array:Vector.<ACard> = null):Vector.<ACard>
+		public function randomizeCards(_array:Vector.<ACard> = null):Vector.<ACard>
 		{
 			var _tempArray:Vector.<ACard> = _array.concat();
 			var _randomArray:Vector.<ACard> = new Vector.<ACard>();

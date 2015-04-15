@@ -9,7 +9,7 @@ package com.debug
 		public static const STATE:String =	"[ STATE ] - ";
 		public static const ALERT:String =	"[ ALERT ] - ";
 		
-		public static var debbugin:Boolean = true; 
+		public static var debbugin:Boolean = false; 
 		
 		public function Debug()
 		{

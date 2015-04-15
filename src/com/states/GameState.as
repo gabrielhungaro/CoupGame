@@ -74,20 +74,34 @@ package com.states
 			Debug.message(Debug.INFO, "onCompleteLoadXMLCards - GameState");
 			vectorOfCards = cardFactory.getVectorOfRandomCards().concat();
 			removeLoadScreen();
+		}
+		
+		private function initGame():void
+		{
 			distributeCards();
 		}
 		
 		private function distributeCards():void
 		{
-			// TODO Auto Generated method stub
+			trace("vectorOfCards: " + vectorOfCards.length);
 			while(cardsDistributed < Game.getNumberOfCardsPerPlayer()){
 				cardsDistributed++;
 				for (var i:int = 0; i <= Game.getNumberOfPlayers(); i++) 
 				{
+					trace("player: " + vectorOfPlayers[i].getName() + " recebe a carta: " + vectorOfCards[i] + " - " + vectorOfCards[i].getName());
 					vectorOfPlayers[i].addCard(vectorOfCards[i]);
+					vectorOfCards[i] = null;
+					vectorOfCards.splice(i, 1);
 				}
+				
 			}
-			showPlayersCards();
+			sortPlayerTurn();
+			//showPlayersCards();
+		}
+		
+		private function shuffleCards():void
+		{
+			vectorOfCards = cardFactory.randomizeCards(cardFactory.getVectorOfRandomCards().concat());
 		}
 		
 		private function showPlayersCards():void
@@ -102,9 +116,10 @@ package com.states
 			}
 		}
 		
-		private function initGame():void
+		private function sortPlayerTurn():void
 		{
-			
+			var player:int = Math.floor(Math.random() * vectorOfPlayers.length);
+			trace("player turn: " + player + " " + vectorOfPlayers[player].getName());
 		}
 		
 		public override function update():void
