@@ -15,11 +15,20 @@ package com.states
 	{
 		private var cardFactory:CardFactory;
 		private var loaderScreen:Sprite;
-		private var game:Game;
 		private var playerFactory:PlayerFactory;
 		private var vectorOfPlayers:Vector.<APlayer>;
 		private var vectorOfCards:Vector.<ACard>;
 		private var cardsDistributed:int;
+		private var playerTurnId:int;
+		private var playerTurn:APlayer;
+		private var turnTarget:APlayer;
+		private var turnAction:String;
+		private var actionResponseTimer:Boolean;
+		private var count:int;
+		private var seconds:int;
+		private var minutes:int;
+		private var totalSeconds:int;
+		private var timeForResponse:int;
 		
 		public function GameState()
 		{
@@ -30,13 +39,12 @@ package com.states
 		public override function initialize():void
 		{
 			super.initialize();
-			game = Game.getInstance();
 			Debug.message(Debug.METHOD, "initialize " + StatesConstants.GAME_STATE);
 			
 			addLoaderScreen();
 			
 			playerFactory = new PlayerFactory();
-			playerFactory.initialize(Game.getNumberOfPlayers());
+			playerFactory.initialize();
 			vectorOfPlayers = playerFactory.getVectorOfPlayers();
 			
 			cardFactory = new CardFactory();
@@ -66,7 +74,6 @@ package com.states
 		{
 			this.removeChild(loaderScreen);
 			loaderScreen = null;
-			initGame();
 		}
 		
 		private function onCompleteLoadCards():void
@@ -74,11 +81,20 @@ package com.states
 			Debug.message(Debug.INFO, "onCompleteLoadXMLCards - GameState");
 			vectorOfCards = cardFactory.getVectorOfRandomCards().concat();
 			removeLoadScreen();
+			initGame();
 		}
 		
 		private function initGame():void
 		{
+			setEndTurnCallBacks();
 			distributeCards();
+		}
+		
+		private function setEndTurnCallBacks():void
+		{
+			for(var i:int = 0; i < vectorOfPlayers.length; i++){
+				vectorOfPlayers[i].endTurn.add(endTurn);
+			}
 		}
 		
 		private function distributeCards():void
@@ -119,15 +135,97 @@ package com.states
 		private function sortPlayerTurn():void
 		{
 			var playerId:int = Math.floor(Math.random() * vectorOfPlayers.length);
+			playerTurnId = playerId;
 			trace("player turn: " + playerId + " " + vectorOfPlayers[playerId].getName());
-			if(vectorOfPlayers[playerId].getIsAI()){
-				Debug.message(Debug.INFO, "Player: " + vectorOfPlayers[playerId].getName() + " || is AI");
+			changeTurn();
+		}
+		
+		private function changeTurn():void
+		{
+			playerTurn = vectorOfPlayers[playerTurnId];
+			if(playerTurn.getIsAI()){
+				Debug.message(Debug.INFO, "Player: " + playerTurn.getName() + " || is AI");
+				playerTurn.chooseTurnAction();
+			}else{
+				//showTurnActionInterface();
+			}
+			playerTurnId++;
+		}
+		
+		private function endTurn(_target:APlayer, _action:String):void
+		{
+			if(_target != null){
+				turnTarget = _target;
+				turnAction = _action;
+				sendAction(turnTarget);
+			}else{
+				sendAction();
+			}
+		}
+		
+		private function sendAction(_target:APlayer = null):void
+		{
+			if(_target == null){
+				for each (var player:APlayer in vectorOfPlayers) 
+				{
+					if(player.getName() != playerTurn.getName()){
+						_target.receiveAction(turnAction);
+					}
+				}
+			}else{
+				_target.receiveAction(turnAction);
+			}
+			timeForResponse = totalSeconds + Game.getTimeForResponse();
+			actionResponseTimer = true;
+		}
+		
+		private function verifyTurnAction():void
+		{
+			if(turnTarget == null){
+				for each (var i:int in vectorOfPlayers) 
+				{
+					
+				}
+			}else{
+				
 			}
 		}
 		
 		public override function update():void
 		{
 			super.update();
+			count++;
+			if(count >= Game.getFrameRate()){
+				count = 0;
+				seconds++;
+				totalSeconds++;
+			}
+			if(seconds >= 60){
+				minutes++;
+			}
+			if(actionResponseTimer){
+				if(totalSeconds >= timeForResponse){
+					actionResponseTimer = false;
+					verifyActionResponses();
+				}
+			}
+		}
+		
+		private function verifyActionResponses():void
+		{
+			if(turnAction == null){
+				for each (var player:APlayer in vectorOfPlayers) 
+				{
+					if(player.getName() != playerTurn.getName()){
+						if(player.getActionResponse()){
+							
+						}
+					}
+				}
+				
+			}else{
+				
+			}
 		}
 	}
 }

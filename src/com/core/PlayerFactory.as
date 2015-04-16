@@ -13,9 +13,9 @@ package com.core
 			
 		}
 		
-		public function initialize(_numberOfPlayers:int):void
+		public function initialize():void
 		{
-			numberOfPlayers = _numberOfPlayers;
+			numberOfPlayers = Game.getNumberOfPlayers();
 			
 			createPlayers();
 			
@@ -29,7 +29,7 @@ package com.core
 			
 			for (var i:int = 0; i < numberOfPlayers; i++) 
 			{
-				var AIplayer:APlayer = new APlayer();
+				var AIplayer:AIPlayer = new AIPlayer();
 				AIplayer.setName("AI Player" + i);
 				AIplayer.setLifes(Game.getNumberOfCardsPerPlayer());
 				AIplayer.setCoins(Game.getInitialCoins());

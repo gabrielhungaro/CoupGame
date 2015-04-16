@@ -1,5 +1,6 @@
 package com
 {
+	import com.core.Game;
 	import com.debug.Debug;
 	import com.states.GameState;
 	import com.states.StateManager;
@@ -15,6 +16,8 @@ package com
 		public function CoupGame()
 		{
 			Debug.message(Debug.INFO, "Init CoupGame");
+			
+			Game.setFrameRate(stage.frameRate);
 			
 			stateManager = StateManager.getInstance();
 			addChild(stateManager);
