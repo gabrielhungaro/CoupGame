@@ -1,4 +1,4 @@
-package com.core
+﻿package com.core
 {
 	import com.debug.Debug;
 
@@ -11,16 +11,18 @@ package com.core
 		private static var numberOfCardsPerPlayer:int = 2;
 		private static var initialCoins:int = 2;
 		private static var coinsPerIncome:int = 1;
+		private static var coinsPerForeignAid:int = 2;
 		private static var player:APlayer;
 		private static var frameRate:Number;
 		private static var timeForResponse:int = 10;
 		
 		public static const ACTION_CARD:String = "actionCard";
-		public static const ACTION_ACCEPT:String = "actionAccept";
-		public static const ACTION_NOT_ACCEPT:String = "actionNotAccept";
 		public static const ACTION_INCOME:String = "actionIncome";
 		public static const ACTION_FOREIGN_AID:String = "actionForeignAid";
 		public static const ACTION_COUP:String = "actionCoup";
+		
+		public static const ACTION_ACCEPT:String = "actionAccept";
+		public static const ACTION_NOT_ACCEPT:String = "actionNotAccept";
 		
 		public static const AI_RANDOM:String = "random";
 		public static const AI_PERCENT:String = "percent";
@@ -90,6 +92,16 @@ package com.core
 		public static function setCoinsPerIncome(value:int):void
 		{
 			coinsPerIncome = value;
+		}
+
+		public static function getCoinsPerForeignAid():int
+		{
+			return coinsPerForeignAid;
+		}
+
+		public static function setCoinsPerForeignAid(value:int):void
+		{
+			coinsPerForeignAid = value;
 		}
 
 		public static function getCoinsToCoup():int

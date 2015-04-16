@@ -1,4 +1,4 @@
-package com.cards
+﻿package com.cards
 {
 	import com.debug.Debug;
 	
@@ -91,7 +91,7 @@ package com.cards
 			card.setImagePath(_img);
 			card.initialize();
 			vectorOfCards.push(card);
-			addChild(card);
+			//addChild(card);
 		}
 		
 		public function randomizeCards(_array:Vector.<ACard> = null):Vector.<ACard>

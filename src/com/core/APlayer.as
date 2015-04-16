@@ -1,4 +1,4 @@
-package com.core
+﻿package com.core
 {
 	import com.cards.ACard;
 	import com.debug.Debug;
@@ -12,18 +12,28 @@ package com.core
 		private var name:String;
 		private var lifes:int;
 		private var isDead:Boolean;
-		private var vectorOfCards:Vector.<ACard>;
 		private var coins:int;
 		private var isAI:Boolean;
-		private var vectorOfTurnActions:Vector.<String>;
-		private var vectorOfDefensiveActions:Vector.<String>;
-		public var endTurn:Signal = new Signal();
-		private var actionTarget:APlayer;
-		private var actionResponse:String;
 		
+		private var vectorOfCards:Vector.<ACard>;
+		private var vectorOfTurnActions:Vector.<AAction>;
+		private var vectorOfDefensiveActions:Vector.<AAction>;
+		
+		private var turnAction:AAction;
+		private var actionTarget:APlayer;
+		private var actionResponse:AAction;
+		
+		public var actionChoosed:Signal = new Signal();
+		public var responseAction:Signal = new Signal();
+		public var endTurn:Signal = new Signal();
+		
+		public var doIncome:Signal = new Signal();
+		public var doForeignAid:Signal = new Signal();
+		public var doCardHability:Signal = new Signal();
+		public var doCoup:Signal = new Signal();
 		
 		private var status:String;
-		private var STATUS_ON_TURN:String = "active";
+		private var STATUS_ON_TURN:String = "onTurn";
 		private var STATUS_DEFENSIVE:String = "defensive";
 		private var STATUS_WAINTING:String = "waiting";
 		
@@ -33,18 +43,20 @@ package com.core
 		
 		public function initialize():void
 		{
+			status = STATUS_DEFENSIVE;
 			vectorOfCards = new Vector.<ACard>();
-			vectorOfTurnActions = new Vector.<String>();
-			vectorOfDefensiveActions = new Vector.<String>();
-			
-			vectorOfTurnActions.push(Game.ACTION_CARD);
-			vectorOfTurnActions.push(Game.ACTION_INCOME);
-			vectorOfTurnActions.push(Game.ACTION_FOREIGN_AID);
-			vectorOfTurnActions.push(Game.ACTION_COUP);
-			
-			vectorOfDefensiveActions.push(Game.ACTION_ACCEPT);
-			vectorOfDefensiveActions.push(Game.ACTION_NOT_ACCEPT);
-			vectorOfDefensiveActions.push(Game.ACTION_CARD);
+			vectorOfTurnActions = new Vector.<AAction>();
+			vectorOfDefensiveActions = new Vector.<AAction>();
+		}
+		
+		public function addTurnAction(action:AAction):void
+		{
+			vectorOfTurnActions.push(action);
+		}
+		
+		public function addDefensiveAction(action:AAction):void
+		{
+			vectorOfDefensiveActions.push(action);
 		}
 		
 		public function addCard(_card:ACard):void
@@ -60,7 +72,37 @@ package com.core
 			}
 		}
 		
-		public function chooseTurnAction():void
+		public function removeCard():void
+		{
+			switch(Game.AI_TYPE){
+				case Game.AI_PERCENT:
+					
+					break;
+				case Game.AI_RANDOM:
+					removeRandomCard();
+					break;
+				default :
+					
+				break;
+			}
+		}
+		
+		private function removeRandomCard():ACard
+		{
+			var card:ACard;
+			var cardId:int = Math.floor(Math.random() * vectorOfCards.length); 
+			card = vectorOfCards[cardId]; 
+			vectorOfCards.splice(cardId, 1);
+			return card;
+		}
+		
+		public function initTurn():void
+		{
+			status = STATUS_ON_TURN;
+			chooseAction();
+		}
+		
+		private function chooseAction():void
 		{
 			switch(Game.AI_TYPE){
 				case Game.AI_PERCENT:
@@ -70,7 +112,7 @@ package com.core
 					randomAction();
 					break;
 				default :
-					
+					randomAction();
 				break;
 			}
 		}
@@ -85,19 +127,21 @@ package com.core
 		{
 			var randomIndex:int;
 			if(status == STATUS_ON_TURN){
+				trace("player vai realizar acao no proprio turno");
 				randomIndex = Math.floor(Math.random() * vectorOfTurnActions.length);
-				doTurnAction(randomIndex);
+				doTurnAction(vectorOfTurnActions[randomIndex]);
 			}else if(status == STATUS_DEFENSIVE){
+				trace("acao defensiva");
 				randomIndex = Math.floor(Math.random() * vectorOfDefensiveActions.length);
-				actionResponse = doDefensiveAction(randomIndex);
+				doDefensiveAction(vectorOfDefensiveActions[randomIndex]);
 			}
 			return randomIndex;
 		}
 		
-		private function doDefensiveAction(actionId:int):String
+		private function doDefensiveAction(action:AAction):AAction
 		{
-			var action:String = vectorOfDefensiveActions[actionId];
-			switch(action){
+			actionResponse = action;
+			switch(action.getName()){
 				case Game.ACTION_ACCEPT:
 					doAccept();
 					break;
@@ -114,64 +158,90 @@ package com.core
 			return action;
 		}
 		
-		private function doTurnAction(actionId:int):String
+		public function doTurnAction(action:AAction):AAction
 		{
-			var action:String = vectorOfTurnActions[actionId];
-			switch(action){
+			turnAction = action;
+			var canDo:Boolean = verifyCanDoAction(action);
+			if(canDo){
+				Debug.message(Debug.INFO, "Player: [ " + this.getName() + " ] vai fazer acao: " + turnAction.getName());
+				actionChoosed.dispatch(action);
+			}else{
+				chooseAction();
+			}
+			return action;
+		}
+		
+		private function verifyCanDoAction(action:AAction):Boolean
+		{
+			var canDo:Boolean;
+			if(action.getCost() == 0){
+				canDo = true;
+			}else if(action.getCost() <= this.getCoins()){
+				canDo = true;
+			}else{
+				canDo = false;
+			}
+			return canDo;
+		}
+		
+		public function doAction(action:AAction):void
+		{
+			switch(action.getName()){
 				case Game.ACTION_CARD:
-					//doCardHability()
+					//doCardHability.dispatch()
 					break;
 				case Game.ACTION_COUP:
-					doCoup();
+					doCoup.dispatch();
 					break;
 				case Game.ACTION_FOREIGN_AID:
-					//doForeignAid();
+					doForeignAid.dispatch();
 					break;
 				case Game.ACTION_INCOME:
-					doIncome();
+					doIncome.dispatch();
 					break;
 				default:
-					doIncome();
+					doIncome.dispatch();
 					break;
 			}
-			endTurn.dispatch(actionTarget, action);
-			status = STATUS_WAINTING;
-			return action;
+			status = STATUS_DEFENSIVE;
+			endTurn.dispatch();
 		}
 		
 		private function doAccept():void
 		{
-			return;
+			return ;
 		}
 		
 		private function doNotAccept():void
 		{
-			
+			return;
 		}
 		
-		private function doIncome():void
-		{
-			this.addCoins(Game.getCoinsPerIncome());
-		}
-		
-		private function doCoup():void
-		{
-			if(coins >= Game.getCoinsToCoup()){
-				this.removeCoins(Game.getCoinsToCoup());
-			}else{
-				chooseTurnAction();
-			}
-		}
-
 		private function verifyIfCanDoAction(_action:String):void
 		{
 			
 		}
 		
-		public function receiveAction(action:String):String
+		public function receiveAction(action:AAction):AAction
 		{
-			chooseTurnAction();
+			chooseAction();
+			responseAction.dispatch(actionResponse);
 			return actionResponse;
+		}
+		
+		public function receiveResponse(_response:AAction):void
+		{
+			var targetResponse:AAction = actionTarget.getActionResponse();
+			
+			switch(targetResponse){
+				case Game.ACTION_ACCEPT:
+					doAction(turnAction);
+					break;
+				case Game.ACTION_NOT_ACCEPT:
+					break;
+				case Game.ACTION_CARD:
+					break;
+			}
 		}
 		
 		public function getName():String
@@ -244,16 +314,44 @@ package com.core
 			isAI = value;
 		}
 
-		public function getActionResponse():String
+		public function getActionResponse():AAction
 		{
 			return actionResponse;
 		}
 
-		public function setActionResponse(value:String):void
+		public function setActionResponse(value:AAction):void
 		{
 			actionResponse = value;
 		}
+		
+		public function getTurnAction():AAction
+		{
+			return turnAction;
+		}
 
+		public function setTurnAction(value:AAction):void
+		{
+			turnAction = value;
+		}
+		
+		public function setVectorOfTurnActions(value:Vector.<AAction>):void
+		{
+			vectorOfTurnActions = value;
+		}
 
+		public function getVectorOfTurnActions():Vector.<AAction>
+		{
+			return vectorOfTurnActions;
+		}
+		
+		public function setVectorOfDefensiveActions(value:Vector.<AAction>):void
+		{
+			vectorOfDefensiveActions = value;
+		}
+
+		public function getVectorOfDefensiveActions():Vector.<AAction>
+		{
+			return vectorOfDefensiveActions;
+		}
 	}
 }

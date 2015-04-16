@@ -1,34 +1,42 @@
-package com.states
+﻿package com.states
 {
 	import com.cards.ACard;
 	import com.cards.CardFactory;
+	import com.core.AAction;
 	import com.core.APlayer;
+	import com.core.ActionFactory;
 	import com.core.Game;
 	import com.core.PlayerFactory;
 	import com.debug.Debug;
 	
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	import flash.text.TextField;
 
 	public class GameState extends AState
 	{
-		private var cardFactory:CardFactory;
 		private var loaderScreen:Sprite;
+		private var turnInterface:Sprite;
+		
+		private var cardFactory:CardFactory;
 		private var playerFactory:PlayerFactory;
+		private var actionFactory:ActionFactory;
+		
 		private var vectorOfPlayers:Vector.<APlayer>;
 		private var vectorOfCards:Vector.<ACard>;
-		private var cardsDistributed:int;
-		private var playerTurnId:int;
 		private var playerTurn:APlayer;
 		private var turnTarget:APlayer;
-		private var turnAction:String;
-		private var actionResponseTimer:Boolean;
+		private var turnAction:AAction;
+		
+		private var cardsDistributed:int;
+		private var playerTurnId:int;
 		private var count:int;
 		private var seconds:int;
 		private var minutes:int;
 		private var totalSeconds:int;
 		private var timeForResponse:int;
+		private var actionResponseTimer:Boolean;
 		
 		public function GameState()
 		{
@@ -46,6 +54,9 @@ package com.states
 			playerFactory = new PlayerFactory();
 			playerFactory.initialize();
 			vectorOfPlayers = playerFactory.getVectorOfPlayers();
+			
+			actionFactory = new ActionFactory();
+			actionFactory.createPullOfActions(vectorOfPlayers);
 			
 			cardFactory = new CardFactory();
 			cardFactory.onCompleteLoadCards.addOnce(onCompleteLoadCards);
@@ -86,15 +97,19 @@ package com.states
 		
 		private function initGame():void
 		{
-			setEndTurnCallBacks();
+			setPlayersCallBacks();
 			distributeCards();
+			sortPlayerTurn();
 		}
 		
-		private function setEndTurnCallBacks():void
+		private function setPlayersCallBacks():void
 		{
 			for(var i:int = 0; i < vectorOfPlayers.length; i++){
+				vectorOfPlayers[i].actionChoosed.add(actionChoosed);
 				vectorOfPlayers[i].endTurn.add(endTurn);
+				vectorOfPlayers[i].responseAction.add(receiveActionResponse);
 			}
+			
 		}
 		
 		private function distributeCards():void
@@ -111,7 +126,6 @@ package com.states
 				}
 				
 			}
-			sortPlayerTurn();
 			//showPlayersCards();
 		}
 		
@@ -136,6 +150,7 @@ package com.states
 		{
 			var playerId:int = Math.floor(Math.random() * vectorOfPlayers.length);
 			playerTurnId = playerId;
+			playerTurnId = 0;
 			trace("player turn: " + playerId + " " + vectorOfPlayers[playerId].getName());
 			changeTurn();
 		}
@@ -145,50 +160,110 @@ package com.states
 			playerTurn = vectorOfPlayers[playerTurnId];
 			if(playerTurn.getIsAI()){
 				Debug.message(Debug.INFO, "Player: " + playerTurn.getName() + " || is AI");
-				playerTurn.chooseTurnAction();
+				playerTurn.initTurn();
 			}else{
-				//showTurnActionInterface();
+				showTurnInterface();
 			}
 			playerTurnId++;
 		}
 		
-		private function endTurn(_target:APlayer, _action:String):void
+		private function showTurnInterface():void
 		{
-			if(_target != null){
-				turnTarget = _target;
-				turnAction = _action;
-				sendAction(turnTarget);
-			}else{
-				sendAction();
-			}
-		}
-		
-		private function sendAction(_target:APlayer = null):void
-		{
-			if(_target == null){
-				for each (var player:APlayer in vectorOfPlayers) 
-				{
-					if(player.getName() != playerTurn.getName()){
-						_target.receiveAction(turnAction);
-					}
-				}
-			}else{
-				_target.receiveAction(turnAction);
-			}
-			timeForResponse = totalSeconds + Game.getTimeForResponse();
-			actionResponseTimer = true;
-		}
-		
-		private function verifyTurnAction():void
-		{
-			if(turnTarget == null){
-				for each (var i:int in vectorOfPlayers) 
-				{
-					
-				}
-			}else{
+			turnInterface = new Sprite();
+			turnInterface.graphics.beginFill(0x505050,1);
+			turnInterface.graphics.drawRect(50, 50, stage.stageWidth-50, stage.stageHeight-50);
+			turnInterface.graphics.endFill();
+			this.addChild(turnInterface);
+			
+			for(var i:int = 0; i < vectorOfPlayers[0].getVectorOfTurnActions().length; i++){
+				var actionBtn:MovieClip = new MovieClip();
+				actionBtn.graphics.beginFill(0x505080, 1);
+				actionBtn.graphics.drawRect(0,00,100,50);
+				actionBtn.graphics.endFill();
+				actionBtn.name = vectorOfPlayers[0].getVectorOfTurnActions()[i].getName();
+				turnInterface.addChild(actionBtn);
 				
+				var btnName:TextField = new TextField();
+				btnName.text = actionBtn.name;
+				btnName.selectable = false;
+				actionBtn.addChild(btnName);
+				actionBtn.addEventListener(MouseEvent.CLICK, onClickAction);
+				actionBtn.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
+				actionBtn.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+				
+				actionBtn.x = turnInterface.width/2 - actionBtn.width/2;
+				actionBtn.y = (i * 20) + i * actionBtn.height;
 			}
+		}
+		
+		private function onClickAction(event:MouseEvent):void
+		{
+			var choosedActionName:String = event.currentTarget.name;
+			playerTurn.doTurnAction(actionFactory.getActionByName(choosedActionName));
+			removeTurnInterface();
+		}
+		
+		private function removeTurnInterface():void
+		{
+			this.removeChild(turnInterface);
+			turnInterface = null;
+		}
+		
+		private function onMouseOver(event:MouseEvent):void
+		{
+			event.currentTarget.scaleX = event.currentTarget.scaleY += .1;
+		}
+		
+		private function onMouseOut(event:MouseEvent):void
+		{
+			event.currentTarget.scaleX = event.currentTarget.scaleY -= .1;
+		}
+		
+		private function actionChoosed(_action:AAction):void
+		{
+			turnAction = _action;
+			trace("acao escolhida: " + _action.getName());
+			
+			if(_action.getTarget() != null){
+				turnTarget = _action.getTarget();
+			}else{
+				turnTarget = null;
+			}
+			trace("target: " + turnTarget);
+			sendAction(turnAction, turnTarget);
+		}
+		
+		private function sendAction(_action:AAction, _target:APlayer = null):void
+		{
+			if(_action.getCanBeBlocked() == true){
+				if(_target == null){
+					for each (var player:APlayer in vectorOfPlayers) 
+					{
+						if(player.getName() != playerTurn.getName()){
+							_target.receiveAction(turnAction);
+						}
+					}
+				}else{
+					playerTurn.doAction(turnAction);
+				}
+				timeForResponse = totalSeconds + Game.getTimeForResponse();
+				actionResponseTimer = true;
+			}else{
+				trace("this action cant be blocked");
+				playerTurn.doAction(turnAction);
+				actionResponseTimer = false;
+			}
+		}
+		
+		private function receiveActionResponse(actionResponse:AAction):void
+		{
+			playerTurn.receiveResponse(actionResponse);
+		}
+		
+		private function endTurn():void
+		{
+			trace("fim de turno");
+			changeTurn();
 		}
 		
 		public override function update():void
@@ -226,6 +301,22 @@ package com.states
 			}else{
 				
 			}
+		}
+		
+		private function doIncome():void
+		{
+			playerTurn.addCoins(Game.getCoinsPerIncome());
+		}
+		
+		private function doForeignAid():void
+		{
+			playerTurn.addCoins(Game.getCoinsPerIncome());
+		}
+		
+		private function doCoup():void
+		{
+			playerTurn.removeCoins(Game.getCoinsToCoup());
+			turnTarget.removeCard();
 		}
 	}
 }
