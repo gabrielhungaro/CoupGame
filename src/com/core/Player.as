@@ -1,10 +1,11 @@
-package com.core
+﻿package com.core
 {
 	import org.osflash.signals.Signal;
 
 	public class Player extends APlayer
 	{
 		public var responsePlayerAction:Signal = new Signal();
+		public var showChooseActionTargetInterface:Signal = new Signal();
 		public var showChooseDefensiveActionInterface:Signal = new Signal();
 		public var showChooseActionInterface:Signal = new Signal();
 		public var showChooseCardInterface:Signal = new Signal();
@@ -17,6 +18,11 @@ package com.core
 		override protected function chooseAction():void
 		{
 			showChooseDefensiveActionInterface.dispatch();
+		}
+		
+		override protected function chooseActionTarget():void
+		{
+			showChooseActionTargetInterface.dispatch();
 		}
 		
 		override protected function chooseCardAbility():void

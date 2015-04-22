@@ -36,7 +36,7 @@
 		 */
 		public function initialize(completeCallback:Function = null):void
 		{
-			if(completeCallback !=null){
+			if(completeCallback != null){
 				onCompleteLoadCards.addOnce(completeCallback);
 			}
 			loadXML();
@@ -66,12 +66,16 @@
 		private function createPoolOfCards():void
 		{
 			vectorOfCards = new Vector.<ACard>();
+			vectorOfActiveCards = new Vector.<ACard>();
+			vectorOfDefensiveCards = new Vector.<ACard>();
+			
 			var cardName:String;
 			var cardId:int;
 			var cardDesc:String;
 			var cardImg:String;
 			var cardActiveAbility:Boolean;
 			var cardDefensiveAbility:Boolean;
+			var cardMandatoryTarget:Boolean;
 			
 			for(var i:int = 0; i < totalOfCards; i++){
 				for(var j:int = 0; j < numberOfEqualsCards; j++){
@@ -81,7 +85,8 @@
 					cardImg = sourcePath + xml.CARD[i].@img;
 					cardActiveAbility = xml.CARD[i].@activeAbility;
 					cardDefensiveAbility = xml.CARD[i].@defensiveAbility;
-					createCard(cardName, cardId, cardDesc, cardImg, cardActiveAbility, cardDefensiveAbility);
+					cardMandatoryTarget = xml.CARD[i].@mandatoryTarget;
+					createCard(cardName, cardId, cardDesc, cardImg, cardActiveAbility, cardDefensiveAbility, cardMandatoryTarget);
 				}
 			}
 			
@@ -92,7 +97,7 @@
 			onCompleteLoadCards.dispatch();
 		}
 		
-		private function createCard(_name:String, _id:int, _desc:String, _img:String, _activeAbility:Boolean, _defensiveAbility:Boolean):void
+		private function createCard(_name:String, _id:int, _desc:String, _img:String, _activeAbility:Boolean, _defensiveAbility:Boolean, _mandatoryTarget:Boolean):void
 		{
 			var card:ACard = new ACard();
 			card.setName(_name);
@@ -101,12 +106,14 @@
 			card.setImagePath(_img);
 			card.setHasActiveAbility(_activeAbility);
 			card.setHasDefensiveAbility(_defensiveAbility);
+			card.setMandatoryTarget(_mandatoryTarget);
 			card.initialize();
 			vectorOfCards.push(card);
 			if(_activeAbility){
+				//nulo criar antes
 				vectorOfActiveCards.push(card);
 			}
-			if(_activeAbility){
+			if(_defensiveAbility){
 				vectorOfDefensiveCards.push(card);
 			}
 			//addChild(card);

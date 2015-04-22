@@ -30,11 +30,14 @@
 		public var waitingActionResponse:Signal = new Signal();
 		public var responseAction:Signal = new Signal();
 		public var endTurn:Signal = new Signal();
+		public var returnCard:Signal = new Signal();
+		public var doingAction:Signal = new Signal;
+		public var cardRemoved:Signal = new Signal();
 		
 		
 		public var doIncome:Signal = new Signal();
 		public var doForeignAid:Signal = new Signal();
-		public var doCardHability:Signal = new Signal();
+		public var doCardAbility:Signal = new Signal();
 		public var doCoup:Signal = new Signal();
 		
 		protected var status:String;
@@ -67,29 +70,30 @@
 		public function addCard(_card:ACard):void
 		{
 			if(_card != null){
-				if(lifes <= Game.getNumberOfCardsPerPlayer()){
-					vectorOfCards.push(_card);
-				}else{
-					Debug.Alert("Não é possível ter mais do que duas cartas na mão.");
-				}
+				vectorOfCards.push(_card);
 			}else{
 				Debug.message(Debug.ERROR, "objeto carta é nulo");
 			}
 		}
 		
-		public function removeCard():void
+		public function removeCard(withCallback:Boolean):ACard
 		{
+			var card:ACard;
 			switch(Game.AI_TYPE){
 				case Game.AI_PERCENT:
 					
 					break;
 				case Game.AI_RANDOM:
-					removeRandomCard();
+					card = removeRandomCard();
 					break;
 				default :
-					
+					card = removeRandomCard();
 				break;
 			}
+			if(withCallback){
+				cardRemoved.dispatch();
+			}
+			return card;
 		}
 		
 		private function removeRandomCard():ACard
@@ -99,6 +103,15 @@
 			card = vectorOfCards[cardId]; 
 			vectorOfCards.splice(cardId, 1);
 			return card;
+		}
+		
+		public function swipeCards(_numberOfCardsToReturn:int):void
+		{
+			var vectorOfCardsToReturn:Vector.<ACard> = new Vector.<ACard>();
+			for(var i:int = 0; i < _numberOfCardsToReturn; i++){
+				vectorOfCardsToReturn.push(this.removeCard(false));
+			}
+			returnCard.dispatch(vectorOfCardsToReturn);
 		}
 		
 		public function initTurn():void
@@ -207,17 +220,19 @@
 		private function randomTarget():void
 		{
 			var randomIndex:int;
+			var _target:APlayer;
 			randomIndex = Math.floor(Math.random() * Game.getVectorOfPlayers().length);
-			actionTarget = Game.getVectorOfPlayers()[randomIndex];
-			if(actionTarget.getName() == name){
+			_target = Game.getVectorOfPlayers()[randomIndex];
+			if(_target.getName() == name){
 				randomTarget();
 			}
-			setActionTarget(actionTarget);
+			setActionTarget(_target);
 		}
 		
 		public function setActionTarget(_target:APlayer):void
 		{
-			turnAction.setTarget(_target);
+			actionTarget = _target;
+			turnAction.setTarget(actionTarget);
 			actionChoosed.dispatch(turnAction);
 		}
 		
@@ -268,17 +283,23 @@
 		{
 			if(status == STATUS_ON_TURN){
 				turnAction.setCard(card);
+				turnAction.setMandatoryTarget(card.getMandatoryTarget());
+				
+				doTurnAction(turnAction);
+				cardChoosed.dispatch(turnAction);
 			}else if(status == STATUS_DEFENSIVE){
 				actionResponse.setCard(card);
+				
+				doDefensiveAction(actionResponse);
+				cardChoosed.dispatch(actionResponse);
 			}
-			cardChoosed.dispatch(turnAction);
 		}
 		
 		public function doAction(action:AAction):void
 		{
-			switch(action.getName()){
+			/*switch(action.getName()){
 				case Game.ACTION_CARD:
-					//doCardHability.dispatch();
+					doCardAbility.dispatch();
 					break;
 				case Game.ACTION_COUP:
 					doCoup.dispatch();
@@ -292,9 +313,9 @@
 				default:
 					doIncome.dispatch();
 					break;
-			}
+			}*/
 			status = STATUS_DEFENSIVE;
-			endTurn.dispatch();
+			doingAction.dispatch(action);
 		}
 		
 		private function acceptAction():void

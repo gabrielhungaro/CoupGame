@@ -1,4 +1,4 @@
-package com.core
+﻿package com.core
 {
 	import flash.display.Sprite;
 
@@ -75,6 +75,15 @@ package com.core
 			player = value;
 		}
 
-
+		public function getPlayerByName(name:String):APlayer
+		{
+			var player:APlayer;
+			for each(player in vectorOfPlayers){
+				if(player.getName() == name){
+					return player;
+				}
+			}
+			return player;
+		}
 	}
 }

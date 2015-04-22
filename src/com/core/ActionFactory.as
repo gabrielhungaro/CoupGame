@@ -30,7 +30,7 @@
 			}
 		}
 		
-		private function createAction(_action, _actionName, _actionCost, _canBeBlocked, _actionTarget):AAction
+		private function createAction(_action:AAction, _actionName:String, _actionCost:int, _canBeBlocked:Boolean, _actionTarget:APlayer):AAction
 		{
 			var action:AAction = _action;
 			action.setName(_actionName);

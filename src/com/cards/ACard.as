@@ -1,4 +1,4 @@
-package com.cards
+﻿package com.cards
 {
 	import com.debug.Debug;
 	
@@ -19,6 +19,7 @@ package com.cards
 		private var canUseAbility:Boolean;
 		private var hasActiveAbility:Object;
 		private var hasDefensiveAbility:Boolean;
+		private var mandatoryTarget:Boolean = false;
 		private var coinsToBuy:int;
 		private var loader:Loader;
 		private var image:Bitmap;
@@ -124,6 +125,16 @@ package com.cards
 		public function getHasDefensiveAbility(value:Boolean):Boolean
 		{
 			return hasDefensiveAbility;
+		}
+		
+		public function getMandatoryTarget():Boolean
+		{
+			return mandatoryTarget;
+		}
+
+		public function setMandatoryTarget(value:Boolean):void
+		{
+			mandatoryTarget = value;
 		}
 	}
 }
