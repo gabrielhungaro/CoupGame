@@ -1,5 +1,7 @@
 ﻿package com.cards
 {
+	import com.core.AAction;
+	import com.core.Game;
 	import com.debug.Debug;
 	
 	import flash.display.Sprite;
@@ -16,12 +18,14 @@
 		private var xml:XML;
 		private var xmlPath:String = "../lib/cards.xml";
 		public var onCompleteLoadCards:Signal = new Signal();
-		private var vectorOfCards:Vector.<ACard>;
 		private var totalOfCards:int;
 		private var numberOfEqualsCards:int = 3;
 		private var sourcePath:String;
 		private var poolCreated:Boolean;
-		private var vectorOfRandomCards:Vector.<ACard>;;
+		private var vectorOfCards:Vector.<ACard>;
+		private var vectorOfRandomCards:Vector.<ACard>;
+		private var vectorOfActiveCards:Vector.<ACard>;
+		private var vectorOfDefensiveCards:Vector.<ACard>;
 		
 		public function CardFactory()
 		{
@@ -66,6 +70,8 @@
 			var cardId:int;
 			var cardDesc:String;
 			var cardImg:String;
+			var cardActiveAbility:Boolean;
+			var cardDefensiveAbility:Boolean;
 			
 			for(var i:int = 0; i < totalOfCards; i++){
 				for(var j:int = 0; j < numberOfEqualsCards; j++){
@@ -73,24 +79,36 @@
 					cardId = xml.CARD[i].@id;
 					cardDesc = xml.CARD[i].@description;
 					cardImg = sourcePath + xml.CARD[i].@img;
-					createCard(cardName, cardId, cardDesc, cardImg);
+					cardActiveAbility = xml.CARD[i].@activeAbility;
+					cardDefensiveAbility = xml.CARD[i].@defensiveAbility;
+					createCard(cardName, cardId, cardDesc, cardImg, cardActiveAbility, cardDefensiveAbility);
 				}
 			}
 			
+			Game.setVectorOfActiveCards(vectorOfActiveCards);
+			Game.setVectorOfDefensiveCards(vectorOfDefensiveCards);
 			vectorOfRandomCards = randomizeCards(vectorOfCards);
 			poolCreated = true;
 			onCompleteLoadCards.dispatch();
 		}
 		
-		private function createCard(_name:String, _id:int, _desc:String, _img:String):void
+		private function createCard(_name:String, _id:int, _desc:String, _img:String, _activeAbility:Boolean, _defensiveAbility:Boolean):void
 		{
 			var card:ACard = new ACard();
 			card.setName(_name);
 			card.setId(_id);
 			card.setDescription(_desc);
 			card.setImagePath(_img);
+			card.setHasActiveAbility(_activeAbility);
+			card.setHasDefensiveAbility(_defensiveAbility);
 			card.initialize();
 			vectorOfCards.push(card);
+			if(_activeAbility){
+				vectorOfActiveCards.push(card);
+			}
+			if(_activeAbility){
+				vectorOfDefensiveCards.push(card);
+			}
 			//addChild(card);
 		}
 		
@@ -129,6 +147,21 @@
 		public function setVectorOfRandomCards(value:Vector.<ACard>):void
 		{
 			vectorOfRandomCards = value;
+		}
+		
+		public function getCardByName(cardName:String):ACard
+		{
+			var card:ACard = null;
+			for each(card in vectorOfCards){
+				if(card.getName() == cardName){
+					return card;
+				}
+			}
+			if(card == null){
+				//todo
+				trace("não existe essa acao");
+			}
+			return card;
 		}
 
 	}

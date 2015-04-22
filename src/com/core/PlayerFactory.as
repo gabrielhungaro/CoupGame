@@ -38,6 +38,8 @@ package com.core
 				addChild(AIplayer);
 				vectorOfPlayers.push(AIplayer);
 			}
+			
+			Game.setVectorOfPlayers(vectorOfPlayers);
 		}
 		
 		private function createPlayerUser():void

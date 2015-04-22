@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <CARDS sourcePath="../lib/">
-	<CARD name="Duque"		id="01"	description="sdlksdbklsbdfbasdkjbvraedbkl" img="duque.jpg" imgBack="verso.jpg" ></CARD>
-	<CARD name="Assassino"	id="02"	description="gadgafgadgfadfasdf" img="assassino.jpg" imgBack="verso.jpg" ></CARD>
-	<CARD name="Condessa"	id="03"	description="sdlksdbklsbdfbasfasdfasdfadkjbvraedbkl" img="condessa.jpg" imgBack="verso.jpg"></CARD>
-	<CARD name="Capitão"	id="04"	description="sdlksdbklsbdfbasdfaasdkjbvraedbkl" img="capitao.jpg" imgBack="verso.jpg" ></CARD>
-	<CARD name="Embaixador"	id="05"	description="adfwtf" img="embaixador.jpg" imgBack="verso.jpg" ></CARD>
+	<CARD name="Duque"		id="01"	description="sdlksdbklsbdfbasdkjbvraedbkl" img="duque.jpg" imgBack="verso.jpg" activeAbility="true" defensiveAbility="true" ></CARD>
+	<CARD name="Assassino"	id="02"	description="gadgafgadgfadfasdf" img="assassino.jpg" imgBack="verso.jpg" activeAbility="true" defensiveAbility="false" ></CARD>
+	<CARD name="Condessa"	id="03"	description="sdlksdbklsbdfbasfasdfasdfadkjbvraedbkl" img="condessa.jpg" imgBack="verso.jpg" activeAbility="false" defensiveAbility="true" ></CARD>
+	<CARD name="Capitão"	id="04"	description="sdlksdbklsbdfbasdfaasdkjbvraedbkl" img="capitao.jpg" imgBack="verso.jpg" activeAbility="true" defensiveAbility="true" ></CARD>
+	<CARD name="Embaixador"	id="05"	description="adfwtf" img="embaixador.jpg" imgBack="verso.jpg" activeAbility="true" defensiveAbility="true" ></CARD>
 </CARDS>

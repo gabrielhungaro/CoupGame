@@ -9,33 +9,38 @@
 
 	public class APlayer extends Sprite
 	{
-		private var name:String;
-		private var lifes:int;
-		private var isDead:Boolean;
-		private var coins:int;
-		private var isAI:Boolean;
+		protected var name:String;
+		protected var lifes:int;
+		protected var isDead:Boolean;
+		protected var coins:int;
+		protected var isAI:Boolean;
 		
-		private var vectorOfCards:Vector.<ACard>;
-		private var vectorOfTurnActions:Vector.<AAction>;
-		private var vectorOfDefensiveActions:Vector.<AAction>;
+		protected var vectorOfCards:Vector.<ACard>;
+		protected var vectorOfTurnActions:Vector.<AAction>;
+		protected var vectorOfDefensiveActions:Vector.<AAction>;
 		
-		private var turnAction:AAction;
-		private var actionTarget:APlayer;
-		private var actionResponse:AAction;
+		protected var turnAction:AAction;
+		protected var actionTarget:APlayer;
+		protected var actionResponse:AAction;
+		protected var activeCard:ACard;
+		protected var defensiveCard:ACard;
 		
 		public var actionChoosed:Signal = new Signal();
+		public var cardChoosed:Signal = new Signal();
+		public var waitingActionResponse:Signal = new Signal();
 		public var responseAction:Signal = new Signal();
 		public var endTurn:Signal = new Signal();
+		
 		
 		public var doIncome:Signal = new Signal();
 		public var doForeignAid:Signal = new Signal();
 		public var doCardHability:Signal = new Signal();
 		public var doCoup:Signal = new Signal();
 		
-		private var status:String;
-		private var STATUS_ON_TURN:String = "onTurn";
-		private var STATUS_DEFENSIVE:String = "defensive";
-		private var STATUS_WAINTING:String = "waiting";
+		protected var status:String;
+		protected var STATUS_ON_TURN:String = "onTurn";
+		protected var STATUS_DEFENSIVE:String = "defensive";
+		protected var STATUS_WAINTING:String = "waiting";
 		
 		public function APlayer()
 		{
@@ -98,11 +103,13 @@
 		
 		public function initTurn():void
 		{
+			trace("====================================");
+			trace("Player [ " + name + " ] - initTurn");
 			status = STATUS_ON_TURN;
 			chooseAction();
 		}
 		
-		private function chooseAction():void
+		protected function chooseAction():void
 		{
 			switch(Game.AI_TYPE){
 				case Game.AI_PERCENT:
@@ -123,52 +130,95 @@
 			
 		}
 		
-		public function randomAction():int
+		public function randomAction():void
 		{
 			var randomIndex:int;
 			if(status == STATUS_ON_TURN){
 				trace("player vai realizar acao no proprio turno");
 				randomIndex = Math.floor(Math.random() * vectorOfTurnActions.length);
-				doTurnAction(vectorOfTurnActions[randomIndex]);
+				turnAction = vectorOfTurnActions[randomIndex];
+				if(turnAction.getName() == Game.ACTION_CARD){
+					chooseCardAbility();
+				}else{
+					doTurnAction(turnAction);
+				}
 			}else if(status == STATUS_DEFENSIVE){
-				trace("acao defensiva");
+				trace("acao defensiva do player [ " + name + " ]");
 				randomIndex = Math.floor(Math.random() * vectorOfDefensiveActions.length);
-				doDefensiveAction(vectorOfDefensiveActions[randomIndex]);
+				actionResponse = vectorOfDefensiveActions[randomIndex];
+				if(actionResponse.getName() == Game.ACTION_CARD){
+					chooseCardAbility();
+				}else{
+					doDefensiveAction(actionResponse);
+				}
 			}
-			return randomIndex;
 		}
 		
-		private function doDefensiveAction(action:AAction):AAction
+		public function doDefensiveAction(action:AAction):void
 		{
-			actionResponse = action;
 			switch(action.getName()){
 				case Game.ACTION_ACCEPT:
-					doAccept();
+					acceptAction();
 					break;
 				case Game.ACTION_CARD:
-					//doCardHability();
+					acceptAction();
+					//counterAction;
 					break;
 				case Game.ACTION_NOT_ACCEPT:
-					doNotAccept();
+					contestAction();
 					break;
 				default:
-					doAccept();
+					acceptAction();
 					break;
 			}
-			return action;
+			responseAction.dispatch(actionResponse);
 		}
 		
-		public function doTurnAction(action:AAction):AAction
+		public function doTurnAction(action:AAction):void
 		{
-			turnAction = action;
 			var canDo:Boolean = verifyCanDoAction(action);
 			if(canDo){
 				Debug.message(Debug.INFO, "Player: [ " + this.getName() + " ] vai fazer acao: " + turnAction.getName());
-				actionChoosed.dispatch(action);
+				if(action.getMandatoryTarget() == true){
+					chooseActionTarget();
+				}else{
+					actionChoosed.dispatch(action);
+				}
 			}else{
 				chooseAction();
 			}
-			return action;
+		}
+		
+		protected function chooseActionTarget():void
+		{
+			switch(Game.AI_TYPE){
+				case Game.AI_PERCENT:
+					//percentAction();
+					break;
+				case Game.AI_RANDOM:
+					randomTarget();
+					break;
+				default :
+					randomTarget();
+					break;
+			}
+		}
+		
+		private function randomTarget():void
+		{
+			var randomIndex:int;
+			randomIndex = Math.floor(Math.random() * Game.getVectorOfPlayers().length);
+			actionTarget = Game.getVectorOfPlayers()[randomIndex];
+			if(actionTarget.getName() == name){
+				randomTarget();
+			}
+			setActionTarget(actionTarget);
+		}
+		
+		public function setActionTarget(_target:APlayer):void
+		{
+			turnAction.setTarget(_target);
+			actionChoosed.dispatch(turnAction);
 		}
 		
 		private function verifyCanDoAction(action:AAction):Boolean
@@ -184,11 +234,51 @@
 			return canDo;
 		}
 		
+		protected function chooseCardAbility():void
+		{
+			switch(Game.AI_TYPE){
+				case Game.AI_PERCENT:
+					//percentAction();
+					break;
+				case Game.AI_RANDOM:
+					randomCard();
+					break;
+				default :
+					randomCard();
+					break;
+			}
+			doTurnAction(turnAction);
+		}
+		
+		private function randomCard():void
+		{
+			var randomIndex:int;
+			if(status == STATUS_ON_TURN){
+				randomIndex = Math.floor(Math.random() * Game.getVectorOfActiveCards().length);
+				activeCard = Game.getVectorOfActiveCards()[randomIndex];
+				setActionCard(activeCard);
+			}else if(status == STATUS_DEFENSIVE){
+				randomIndex = Math.floor(Math.random() * Game.getVectorOfDefensiveCards().length);
+				defensiveCard = Game.getVectorOfDefensiveCards()[randomIndex];
+				setActionCard(defensiveCard);
+			}
+		}
+		
+		public function setActionCard(card:ACard):void
+		{
+			if(status == STATUS_ON_TURN){
+				turnAction.setCard(card);
+			}else if(status == STATUS_DEFENSIVE){
+				actionResponse.setCard(card);
+			}
+			cardChoosed.dispatch(turnAction);
+		}
+		
 		public function doAction(action:AAction):void
 		{
 			switch(action.getName()){
 				case Game.ACTION_CARD:
-					//doCardHability.dispatch()
+					//doCardHability.dispatch();
 					break;
 				case Game.ACTION_COUP:
 					doCoup.dispatch();
@@ -207,14 +297,19 @@
 			endTurn.dispatch();
 		}
 		
-		private function doAccept():void
+		private function acceptAction():void
 		{
-			return ;
+			trace("Player [ " + name + " ] accept action");
 		}
 		
-		private function doNotAccept():void
+		private function contestAction():void
 		{
-			return;
+			trace("Player [ " + name + " ] contest action");
+		}
+		
+		private function counterAction():void
+		{
+			
 		}
 		
 		private function verifyIfCanDoAction(_action:String):void
@@ -222,11 +317,10 @@
 			
 		}
 		
-		public function receiveAction(action:AAction):AAction
+		public function receiveAction(action:AAction):void
 		{
 			chooseAction();
-			responseAction.dispatch(actionResponse);
-			return actionResponse;
+			//responseAction.dispatch(actionResponse);
 		}
 		
 		public function receiveResponse(_response:AAction):void
@@ -238,8 +332,10 @@
 					doAction(turnAction);
 					break;
 				case Game.ACTION_NOT_ACCEPT:
+					//verifica se a acao for contestada acontece algo
 					break;
 				case Game.ACTION_CARD:
+					//escolhe se aceita a acao ou nao
 					break;
 			}
 		}
@@ -352,6 +448,26 @@
 		public function getVectorOfDefensiveActions():Vector.<AAction>
 		{
 			return vectorOfDefensiveActions;
+		}
+		
+		public function setActiveCard(value:ACard):void
+		{
+			activeCard = value;
+		}
+		
+		public function getActiveCard():ACard
+		{
+			return activeCard;
+		}
+		
+		public function setDefensiveCard(value:ACard):void
+		{
+			activeCard = value;
+		}
+		
+		public function getDefensiveCard():ACard
+		{
+			return activeCard;
 		}
 	}
 }

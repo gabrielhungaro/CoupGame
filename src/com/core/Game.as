@@ -1,5 +1,6 @@
 ﻿package com.core
 {
+	import com.cards.ACard;
 	import com.debug.Debug;
 
 	public class Game
@@ -15,6 +16,9 @@
 		private static var player:APlayer;
 		private static var frameRate:Number;
 		private static var timeForResponse:int = 10;
+		private static var vectorOfPlayers:Vector.<APlayer>;
+		private static var vectorOfActiveCards:Vector.<ACard>;
+		private static var vectorOfDefensiveCards:Vector.<ACard>;
 		
 		public static const ACTION_CARD:String = "actionCard";
 		public static const ACTION_INCOME:String = "actionIncome";
@@ -42,6 +46,13 @@
 				_instance = new Game();
 			} 
 			return _instance;
+		}
+		
+		public static function initialize():void
+		{
+			vectorOfPlayers = new Vector.<APlayer>();
+			vectorOfActiveCards = new Vector.<ACard>();
+			vectorOfDefensiveCards = new Vector.<ACard>();
 		}
 
 		public static function getNumberOfPlayers():int
@@ -132,6 +143,36 @@
 		public static function setTimeForResponse(value:int):void
 		{
 			timeForResponse = value;
+		}
+
+		public static function getVectorOfPlayers():Vector.<APlayer>
+		{
+			return vectorOfPlayers;
+		}
+
+		public static function setVectorOfPlayers(value:Vector.<APlayer>):void
+		{
+			vectorOfPlayers = value;
+		}
+
+		public static function getVectorOfActiveCards():Vector.<ACard>
+		{
+			return vectorOfActiveCards;
+		}
+
+		public static function setVectorOfActiveCards(value:Vector.<ACard>):void
+		{
+			vectorOfActiveCards = value;
+		}
+
+		public static function getVectorOfDefensiveCards():Vector.<ACard>
+		{
+			return vectorOfDefensiveCards;
+		}
+
+		public static function setVectorOfDefensiveCards(value:Vector.<ACard>):void
+		{
+			vectorOfDefensiveCards = value;
 		}
 
 

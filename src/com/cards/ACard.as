@@ -17,6 +17,8 @@ package com.cards
 		//private var image:Sprite;
 		private var imagePath:String;
 		private var canUseAbility:Boolean;
+		private var hasActiveAbility:Object;
+		private var hasDefensiveAbility:Boolean;
 		private var coinsToBuy:int;
 		private var loader:Loader;
 		private var image:Bitmap;
@@ -104,6 +106,24 @@ package com.cards
 			id = value;
 		}
 
+		public function setHasActiveAbility(value:Boolean):void
+		{
+			hasActiveAbility = value;
+		}
+		
+		public function getHasActiveAbility(value:Boolean):Boolean
+		{
+			return hasActiveAbility;
+		}
 
+		public function setHasDefensiveAbility(value:Boolean):void
+		{
+			hasDefensiveAbility = value;
+		}
+		
+		public function getHasDefensiveAbility(value:Boolean):Boolean
+		{
+			return hasDefensiveAbility;
+		}
 	}
 }

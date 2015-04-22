@@ -17,6 +17,7 @@ package com
 		{
 			Debug.message(Debug.INFO, "Init CoupGame");
 			
+			Game.initialize();
 			Game.setFrameRate(stage.frameRate);
 			
 			stateManager = StateManager.getInstance();
