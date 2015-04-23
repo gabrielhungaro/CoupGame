@@ -263,7 +263,7 @@
 					randomCard();
 					break;
 			}
-			doTurnAction(turnAction);
+			//doTurnAction(turnAction);
 		}
 		
 		private function randomCard():void
@@ -351,7 +351,7 @@
 			
 			switch(targetResponse){
 				case Game.ACTION_ACCEPT:
-					doAction(turnAction);
+					//doAction(turnAction);
 					break;
 				case Game.ACTION_NOT_ACCEPT:
 					//verifica se a acao for contestada acontece algo

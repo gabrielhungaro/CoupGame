@@ -36,11 +36,14 @@
 		
 		private var cardsDistributed:int;
 		private var turnPlayerId:int;
+		private var turnResponseId:int;
 		private var count:int;
 		private var seconds:int;
 		private var minutes:int;
 		private var totalSeconds:int;
 		private var timeForResponse:int;
+		private var numberOfResponsesReceived:int;
+		private var numberOfWaintingResponses:int;
 		private var actionResponseTimer:Boolean;
 		
 		private var turnType:String;
@@ -176,6 +179,7 @@
 		private function changeTurn():void
 		{
 			calculateturnPlayer();
+			turnResponseId = turnPlayerId+1;
 			trace("player turn: " + turnPlayerId + " " + vectorOfPlayers[turnPlayerId].getName());
 			turnPlayer = vectorOfPlayers[turnPlayerId];
 			turnType = TURN_ACTIVE;
@@ -395,41 +399,70 @@
 			turnTarget = _action.getTarget();
 			trace("acao escolhida: " + _action.getName());
 			trace("target: " + turnTarget);
-			sendAction(turnAction);
+			
+			verifyIfActionCanBeBlocked(turnAction);
+			//sendAction(turnAction);
 		}
 		
-		private function sendAction(_action:AAction):void
+		private function verifyIfActionCanBeBlocked(_action:AAction):void
 		{
 			trace(_action, _action.getCanBeBlocked());
 			if(_action.getCanBeBlocked() == true){
-				turnType = TURN_DEFENSIVE;
+				
 				if(turnTarget == null){
-					for each (var player:APlayer in vectorOfPlayers) 
-					{
-						if(player.getName() != turnPlayer.getName()){
-							player.receiveAction(turnAction);
-						}
+					if(){
+						
 					}
+					sendAction(_action, getNextPlayerToResponse());
 				}else{
+					numberOfWaintingResponses = 1;
+					sendAction(_action, turnAction);
 					turnTarget.receiveAction(turnAction);
-					//turnPlayer.doAction(turnAction);
 				}
-				timeForResponse = totalSeconds + Game.getTimeForResponse();
-				actionResponseTimer = true;
 			}else{
 				trace("this action cant be blocked");
-				if(turnAction.getMandatoryTarget() && turnAction.getTarget() == null){
-					
-				}else{
-					turnPlayer.doAction(turnAction);
-					
-				}
+				turnPlayer.doAction(turnAction);
+				
 				actionResponseTimer = false;
+			}
+		}
+		
+		private function sendAction(_action:AAction, _target:APlayer):void
+		{
+			trace(_action, _action.getCanBeBlocked());
+			turnType = TURN_DEFENSIVE;
+			_target.receiveAction(turnAction);
+			
+			timeForResponse = totalSeconds + Game.getTimeForResponse();
+			actionResponseTimer = true;
+		}
+		
+		private function sendActionToAll():void
+		{
+			numberOfWaintingResponses = vectorOfPlayers.length;
+			for(var i:int = 1; i <= vectorOfPlayers.length; i++) 
+			{						
+				nextPlayer = turnPlayerId+i;
+				if(nextPlayer == vectorOfPlayers.length-1){
+					nextPlayer = 0;
+				}
+				
+				if(vectorOfPlayers[nextPlayer].getName() != turnPlayer.getName()){
+					vectorOfPlayers[nextPlayer].receiveAction(turnAction);
+				}
 			}
 		}
 		
 		private function receiveActionResponse(actionResponse:AAction):void
 		{
+			//verifica tipo de resposta
+			numberOfResponsesReceived++;
+			if(numberOfResponsesReceived >= numberOfWaintingResponses){
+				
+			}else{
+				turnResponseId++;
+				sendAction(turnAction, getNextPlayerToResponse());
+			}
 			turnPlayer.receiveResponse(actionResponse);
 		}
 		
@@ -504,6 +537,13 @@
 			}else{
 				
 			}
+		}
+		
+		private function getNextPlayerToResponse():APlayer
+		{
+			var nextPlayer:APlayer;
+			nextPlayer = vectorOfPlayers[turnResponseId];
+			return nextPlayer;
 		}
 		
 		private function doIncome():void
