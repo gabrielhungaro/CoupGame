@@ -189,6 +189,7 @@
 		
 		public function doTurnAction(action:AAction):void
 		{
+			turnAction = action;
 			var canDo:Boolean = verifyCanDoAction(action);
 			if(canDo){
 				Debug.message(Debug.INFO, "Player: [ " + this.getName() + " ] vai fazer acao: " + turnAction.getName());

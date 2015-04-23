@@ -17,7 +17,7 @@
 		
 		override protected function chooseAction():void
 		{
-			showChooseDefensiveActionInterface.dispatch();
+			showChooseActionInterface.dispatch();
 		}
 		
 		override protected function chooseActionTarget():void

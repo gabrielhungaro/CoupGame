@@ -121,7 +121,7 @@
 				vectorOfPlayers[i].doingAction.add(doAction);
 				vectorOfPlayers[i].returnCard.add(returnedCard);
 				vectorOfPlayers[i].cardRemoved.add(cardRemoved);
-				if(vectorOfPlayers[i] == Player){
+				if(vectorOfPlayers[i] is Player){
 					(vectorOfPlayers[i] as Player).showChooseActionInterface.add(showTurnInterface);
 					(vectorOfPlayers[i] as Player).showChooseActionTargetInterface.add(showChooseActionTargetInterface);
 					(vectorOfPlayers[i] as Player).showChooseDefensiveActionInterface.add(showDefensiveInterface);
@@ -169,7 +169,7 @@
 		{
 			var playerId:int = Math.floor(Math.random() * vectorOfPlayers.length);
 			turnPlayerId = playerId;
-			turnPlayerId = 0;
+			turnPlayerId = -1;
 			changeTurn();
 		}
 		
