@@ -9,6 +9,7 @@
 		public var showChooseDefensiveActionInterface:Signal = new Signal();
 		public var showChooseActionInterface:Signal = new Signal();
 		public var showChooseCardInterface:Signal = new Signal();
+		public var showChooseHandsCardInterface:Signal = new Signal();
 		
 		public function Player()
 		{
@@ -38,6 +39,12 @@
 		override public function doDefensiveAction(action:AAction):void
 		{
 			super.doDefensiveAction(action);
+		}
+		
+		override public function chooseCardToRemove(withCallback:Boolean):ACard
+		{
+			vectorOfRemovedCards = [];
+			showChooseHandsCardInterface.dispatch(this);
 		}
 	}
 }

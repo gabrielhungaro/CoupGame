@@ -76,6 +76,8 @@
 			var cardActiveAbility:Boolean;
 			var cardDefensiveAbility:Boolean;
 			var cardMandatoryTarget:Boolean;
+			var cardAbilityCost:int;
+			var cardCounterTo:String;
 			
 			for(var i:int = 0; i < totalOfCards; i++){
 				for(var j:int = 0; j < numberOfEqualsCards; j++){
@@ -83,10 +85,20 @@
 					cardId = xml.CARD[i].@id;
 					cardDesc = xml.CARD[i].@description;
 					cardImg = sourcePath + xml.CARD[i].@img;
-					cardActiveAbility = xml.CARD[i].@activeAbility;
-					cardDefensiveAbility = xml.CARD[i].@defensiveAbility;
-					cardMandatoryTarget = xml.CARD[i].@mandatoryTarget;
-					createCard(cardName, cardId, cardDesc, cardImg, cardActiveAbility, cardDefensiveAbility, cardMandatoryTarget);
+					cardActiveAbility = (xml.CARD[i].@activeAbility == "true");
+					cardDefensiveAbility = (xml.CARD[i].@defensiveAbility == "true");
+					cardMandatoryTarget = (xml.CARD[i].@mandatoryTarget == "true");
+					cardAbilityCost = xml.CARD[i].@abilityCost;
+					cardCounterTo = xml.CARD[i].@counterTo;
+					createCard(cardName,
+							   cardId,
+							   cardDesc, 
+							   cardImg, 
+							   cardActiveAbility, 
+							   cardDefensiveAbility, 
+							   cardMandatoryTarget,
+							   cardAbilityCost,
+							   cardCounterTo);
 				}
 			}
 			
@@ -97,7 +109,15 @@
 			onCompleteLoadCards.dispatch();
 		}
 		
-		private function createCard(_name:String, _id:int, _desc:String, _img:String, _activeAbility:Boolean, _defensiveAbility:Boolean, _mandatoryTarget:Boolean):void
+		private function createCard(_name:String,
+									_id:int,
+									_desc:String, 
+									_img:String, 
+									_activeAbility:Boolean, 
+									_defensiveAbility:Boolean, 
+									_mandatoryTarget:Boolean, 
+									_abilityCost:int, 
+									_counterTo:String):void
 		{
 			var card:ACard = new ACard();
 			card.setName(_name);
@@ -107,13 +127,15 @@
 			card.setHasActiveAbility(_activeAbility);
 			card.setHasDefensiveAbility(_defensiveAbility);
 			card.setMandatoryTarget(_mandatoryTarget);
+			card.setAbilityCost(_abilityCost);
+			card.setCounterTo(_counterTo);
 			card.initialize();
 			vectorOfCards.push(card);
-			if(_activeAbility){
+			if(_activeAbility == true){
 				//nulo criar antes
 				vectorOfActiveCards.push(card);
 			}
-			if(_defensiveAbility){
+			if(_defensiveAbility == true){
 				vectorOfDefensiveCards.push(card);
 			}
 			//addChild(card);

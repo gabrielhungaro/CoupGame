@@ -20,13 +20,13 @@
 		private static var vectorOfActiveCards:Vector.<ACard>;
 		private static var vectorOfDefensiveCards:Vector.<ACard>;
 		
-		public static const ACTION_CARD:String = "actionCard";
-		public static const ACTION_INCOME:String = "actionIncome";
-		public static const ACTION_FOREIGN_AID:String = "actionForeignAid";
-		public static const ACTION_COUP:String = "actionCoup";
+		public static const ACTION_CARD:String = "Card";
+		public static const ACTION_INCOME:String = "Income";
+		public static const ACTION_FOREIGN_AID:String = "ForeignAid";
+		public static const ACTION_COUP:String = "Coup";
 		
-		public static const ACTION_ACCEPT:String = "actionAccept";
-		public static const ACTION_NOT_ACCEPT:String = "actionNotAccept";
+		public static const ACTION_ACCEPT:String = "Accept";
+		public static const ACTION_NOT_ACCEPT:String = "NotAccept";
 		
 		public static const AI_RANDOM:String = "random";
 		public static const AI_PERCENT:String = "percent";

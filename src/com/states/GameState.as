@@ -22,7 +22,7 @@
 		private var turnInterface:Sprite;
 		private var defensiveInterface:Sprite;
 		private var chooseCardInterface:Sprite;
-		private var chooseChooseActionTargetInterface:Sprite;
+		private var chooseActionTargetInterface:Sprite;
 		
 		private var cardFactory:CardFactory;
 		private var playerFactory:PlayerFactory;
@@ -58,7 +58,6 @@
 		
 		public override function initialize():void
 		{
-			turnTarget = new APlayer();
 			super.initialize();
 			Debug.message(Debug.METHOD, "initialize " + StatesConstants.GAME_STATE);
 			
@@ -129,6 +128,7 @@
 					(vectorOfPlayers[i] as Player).showChooseActionTargetInterface.add(showChooseActionTargetInterface);
 					(vectorOfPlayers[i] as Player).showChooseDefensiveActionInterface.add(showDefensiveInterface);
 					(vectorOfPlayers[i] as Player).showChooseCardInterface.add(showChooseCardInterface);
+					(vectorOfPlayers[i] as Player).showChooseHandsCardInterface.add(showChooseHandsCardInterface);
 				}
 				vectorOfPlayers[i].endTurn.add(endTurn);
 			}
@@ -294,6 +294,8 @@
 			this.addChild(chooseCardInterface);
 			
 			var vectorOfCards:Vector.<ACard>;
+			var arrayOfCounters:Array;
+			
 			if(turnType == TURN_ACTIVE){
 				vectorOfCards = Game.getVectorOfActiveCards();
 			}else if(turnType == TURN_DEFENSIVE){
@@ -312,12 +314,23 @@
 				btnName.text = cardBtn.name;
 				btnName.selectable = false;
 				cardBtn.addChild(btnName);
+				
 				cardBtn.addEventListener(MouseEvent.CLICK, onClickCard);
 				cardBtn.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
 				cardBtn.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
 				
 				cardBtn.x = chooseCardInterface.width/2 - cardBtn.width/2;
 				cardBtn.y = (i * 20) + i * cardBtn.height;
+				
+				if(turnType == TURN_DEFENSIVE){
+					arrayOfCounters = cardFactory.getCardByName(cardBtn.name).getArrayOfCountersTo();
+					for(var j:int = 0; j < arrayOfCounters.length; j++){
+						if(arrayOfCounters[j] != turnAction.getCard().getName()){
+							cardBtn.mouseEnabled = false;
+							cardBtn.alpha = .8;
+						}
+					}
+				}
 			}
 		}
 		
@@ -342,11 +355,11 @@
 		
 		private function showChooseActionTargetInterface():void
 		{
-			chooseChooseActionTargetInterface = new Sprite();
-			chooseChooseActionTargetInterface.graphics.beginFill(0x505050,1);
-			chooseChooseActionTargetInterface.graphics.drawRect(50, 50, stage.stageWidth-100, stage.stageHeight-100);
-			chooseChooseActionTargetInterface.graphics.endFill();
-			this.addChild(chooseChooseActionTargetInterface);
+			chooseActionTargetInterface = new Sprite();
+			chooseActionTargetInterface.graphics.beginFill(0x505050,1);
+			chooseActionTargetInterface.graphics.drawRect(50, 50, stage.stageWidth-100, stage.stageHeight-100);
+			chooseActionTargetInterface.graphics.endFill();
+			this.addChild(chooseActionTargetInterface);
 			
 			for(var i:int = 0; i < vectorOfPlayers.length; i++){
 				var playerBtn:MovieClip = new MovieClip();
@@ -354,7 +367,7 @@
 				playerBtn.graphics.drawRect(0,00,100,50);
 				playerBtn.graphics.endFill();
 				playerBtn.name = vectorOfCards[i].getName();
-				chooseChooseActionTargetInterface.addChild(playerBtn);
+				chooseActionTargetInterface.addChild(playerBtn);
 				
 				var btnName:TextField = new TextField();
 				btnName.text = playerBtn.name;
@@ -364,7 +377,7 @@
 				playerBtn.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
 				playerBtn.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
 				
-				playerBtn.x = chooseChooseActionTargetInterface.width/2 - playerBtn.width/2;
+				playerBtn.x = chooseActionTargetInterface.width/2 - playerBtn.width/2;
 				playerBtn.y = (i * 20) + i * playerBtn.height;
 			}
 		}
@@ -381,6 +394,41 @@
 		{
 			this.removeChild(chooseChooseActionTargetInterface);
 			chooseChooseActionTargetInterface = null;
+		}
+		
+		private function showChooseHandsCardInterface(player:APlayer):void
+		{
+			chooseHandsCardInterface = new Sprite();
+			chooseHandsCardInterface.graphics.beginFill(0x505050,1);
+			chooseHandsCardInterface.graphics.drawRect(50, 50, stage.stageWidth-100, stage.stageHeight-100);
+			chooseHandsCardInterface.graphics.endFill();
+			this.addChild(chooseHandsCardInterface);
+			
+			for(var i:int = 0; i < player.getVectorOfCards().length; i++){
+				var cardBtn:MovieClip = new MovieClip();
+				cardBtn.graphics.beginFill(0x606080, 1);
+				cardBtn.graphics.drawRect(0,00,100,50);
+				cardBtn.graphics.endFill();
+				cardBtn.name = player.getVectorOfCards()[i].getName();
+				chooseChooseActionTargetInterface.addChild(cardBtn);
+				
+				var btnName:TextField = new TextField();
+				btnName.text = cardBtn.name;
+				btnName.selectable = false;
+				cardBtn.addChild(btnName);
+				cardBtn.addEventListener(MouseEvent.CLICK, onClickHandsCard);
+				cardBtn.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
+				cardBtn.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+				
+				cardBtn.x = chooseHandsCardInterface.width/2 - cardBtn.width/2;
+				cardBtn.y = (i * 20) + i * cardBtn.height;
+			}
+		}
+		
+		private function onClickHandsCard(event:MouseEvent):void
+		{
+			//fazer isso
+			player.removeCard()
 		}
 		
 		private function onMouseOver(event:MouseEvent):void
@@ -406,21 +454,16 @@
 		
 		private function verifyIfActionCanBeBlocked(_action:AAction):void
 		{
-			trace(_action, _action.getCanBeBlocked());
+			trace("action: " + _action.getName() + " can be blocked? " + _action.getCanBeBlocked());
 			if(_action.getCanBeBlocked() == true){
-				
 				if(turnTarget == null){
-					if(){
-						
-					}
+					numberOfWaintingResponses = vectorOfPlayers.length-1;
 					sendAction(_action, getNextPlayerToResponse());
 				}else{
 					numberOfWaintingResponses = 1;
-					sendAction(_action, turnAction);
-					turnTarget.receiveAction(turnAction);
+					sendAction(_action, turnTarget);
 				}
 			}else{
-				trace("this action cant be blocked");
 				turnPlayer.doAction(turnAction);
 				
 				actionResponseTimer = false;
@@ -429,7 +472,8 @@
 		
 		private function sendAction(_action:AAction, _target:APlayer):void
 		{
-			trace(_action, _action.getCanBeBlocked());
+			trace("Player: " + turnPlayer.getName() + " will send action: " + _action.getName() + " to player: " + _target.getName());
+			Debug.message(Debug.INFO, "Player: " + turnPlayer.getName() + " will send action: " + _action.getName() + " to player: " + _target.getName());
 			turnType = TURN_DEFENSIVE;
 			_target.receiveAction(turnAction);
 			
@@ -437,33 +481,40 @@
 			actionResponseTimer = true;
 		}
 		
-		private function sendActionToAll():void
-		{
-			numberOfWaintingResponses = vectorOfPlayers.length;
-			for(var i:int = 1; i <= vectorOfPlayers.length; i++) 
-			{						
-				nextPlayer = turnPlayerId+i;
-				if(nextPlayer == vectorOfPlayers.length-1){
-					nextPlayer = 0;
-				}
-				
-				if(vectorOfPlayers[nextPlayer].getName() != turnPlayer.getName()){
-					vectorOfPlayers[nextPlayer].receiveAction(turnAction);
-				}
-			}
-		}
-		
 		private function receiveActionResponse(actionResponse:AAction):void
 		{
 			//verifica tipo de resposta
 			numberOfResponsesReceived++;
-			if(numberOfResponsesReceived >= numberOfWaintingResponses){
-				
+			verifyResponse(actionResponse);
+			/*if(numberOfResponsesReceived >= numberOfWaintingResponses){
+				//todos ja responderam
+				turnPlayer.doAction(turnAction);
 			}else{
+				verifyResponse(actionResponse);
 				turnResponseId++;
 				sendAction(turnAction, getNextPlayerToResponse());
+			}*/
+			//turnPlayer.receiveResponse(actionResponse);
+		}
+		
+		private function verifyResponse(_response:AAction):void
+		{
+			switch(_response.getName()){
+				case Game.ACTION_ACCEPT:
+					if(numberOfResponsesReceived >= numberOfWaintingResponses){
+						turnPlayer.doAction(turnAction);
+					}else{
+						turnResponseId++;
+						sendAction(turnAction, getNextPlayerToResponse());
+					}
+				break;
+				case Game.ACTION_NOT_ACCEPT:
+					turnPlayer.receiveResponse(_response);
+				break;
+				case Game.ACTION_CARD:
+					turnPlayer.receiveResponse(_response);
+				break;
 			}
-			turnPlayer.receiveResponse(actionResponse);
 		}
 		
 		private function cardChoosed(_card):void
@@ -561,8 +612,7 @@
 		private function doCoup():void
 		{
 			turnPlayer.removeCoins(Game.getCoinsToCoup());
-			turnTarget.removeCard(false);
-			endTurn();
+			turnTarget.chooseCardToRemove();
 		}
 		
 		private function doCardAbility():void
@@ -573,7 +623,7 @@
 					endTurn();
 				break;
 				case CardConstants.ASSASSINO:
-					turnTarget.removeCard(true);
+					turnTarget.chooseCardToRemove();
 				break;
 				case CardConstants.CONDESSA:
 					trace("Condessa não faz nada");

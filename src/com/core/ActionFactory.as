@@ -14,14 +14,14 @@
 			vectorOfTurnActions = new Vector.<AAction>();
 			vectorOfDefensiveActions = new Vector.<AAction>();
 			
-			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_INCOME, 0, false, null));
-			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_FOREIGN_AID, 0, true, null));
-			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_CARD, 0, true, null));
-			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_COUP, 0, false, null));
+			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_INCOME, 0, false, false));
+			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_FOREIGN_AID, 0, true, false));
+			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_CARD, 0, true, true));
+			vectorOfTurnActions.push(createAction(new AAction(), Game.ACTION_COUP, Game.getCoinsToCoup(), false, true));
 			
-			vectorOfDefensiveActions.push(createAction(new AAction(), Game.ACTION_ACCEPT, 0, false, null));
-			vectorOfDefensiveActions.push(createAction(new AAction(), Game.ACTION_NOT_ACCEPT, 0, false, null));
-			vectorOfDefensiveActions.push(createAction(new AAction(), Game.ACTION_CARD, 0, false, null));
+			vectorOfDefensiveActions.push(createAction(new AAction(), Game.ACTION_ACCEPT, 0, false, false));
+			vectorOfDefensiveActions.push(createAction(new AAction(), Game.ACTION_NOT_ACCEPT, 0, false, false));
+			vectorOfDefensiveActions.push(createAction(new AAction(), Game.ACTION_CARD, 0, false, false));
 			
 			
 			for each(var player:APlayer in vector){
@@ -30,13 +30,13 @@
 			}
 		}
 		
-		private function createAction(_action:AAction, _actionName:String, _actionCost:int, _canBeBlocked:Boolean, _actionTarget:APlayer):AAction
+		private function createAction(_action:AAction, _actionName:String, _actionCost:int, _canBeBlocked:Boolean, _mandatoryTarget:Boolean):AAction
 		{
 			var action:AAction = _action;
 			action.setName(_actionName);
 			action.setCost(_actionCost);
 			action.setCanBeBlocked(_canBeBlocked);
-			action.setTarget(_actionTarget);
+			action.setMandatoryTarget(_mandatoryTarget);
 			return action;
 		}
 		

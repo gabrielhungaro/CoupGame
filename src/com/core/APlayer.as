@@ -18,6 +18,7 @@
 		protected var vectorOfCards:Vector.<ACard>;
 		protected var vectorOfTurnActions:Vector.<AAction>;
 		protected var vectorOfDefensiveActions:Vector.<AAction>;
+		public var vectorOfRemovedCards:Vector.<ACard>;
 		
 		protected var turnAction:AAction;
 		protected var actionTarget:APlayer;
@@ -76,42 +77,59 @@
 			}
 		}
 		
-		public function removeCard(withCallback:Boolean):ACard
+		public function chooseCardToRemove():void
 		{
-			var card:ACard;
 			switch(Game.AI_TYPE){
 				case Game.AI_PERCENT:
 					
 					break;
 				case Game.AI_RANDOM:
-					card = removeRandomCard();
+					removeRandomCard();
 					break;
 				default :
-					card = removeRandomCard();
+					removeRandomCard();
 				break;
 			}
-			if(withCallback){
-				cardRemoved.dispatch();
-			}
-			return card;
 		}
 		
-		private function removeRandomCard():ACard
+		private function removeRandomCard():void
 		{
-			var card:ACard;
+			/*var card:ACard;
 			var cardId:int = Math.floor(Math.random() * vectorOfCards.length); 
 			card = vectorOfCards[cardId]; 
 			vectorOfCards.splice(cardId, 1);
+			return card;*/
+			var card:ACard = chooseRandomCardOfHand();
+			removeCard(card);
+		}
+		
+		private functon removeCard(card:ACard):void
+		{
+			vectorOfRemovedCards.push(card);
+			vectorOfCards.splice(vectorOfCards.indexOf(card),1);
+			cardRemoved.dispatch();
+		}
+		
+		private function chooseRandomCardOfHand():ACard
+		{
+			vectorOfRemovedCards = [];
+			var card:ACard;
+			var cardId:int = Math.floor(Math.random() * vectorOfCards.length); 
+			card = vectorOfCards[cardId];
 			return card;
 		}
 		
 		public function swipeCards(_numberOfCardsToReturn:int):void
 		{
+			//arrumar swipe
+			removeToSwipe = true;
 			var vectorOfCardsToReturn:Vector.<ACard> = new Vector.<ACard>();
 			for(var i:int = 0; i < _numberOfCardsToReturn; i++){
-				vectorOfCardsToReturn.push(this.removeCard(false));
+				this.chooseCardToRemove()
+				vectorOfCardsToReturn.push(vectorOfRemovedCards[i]);
 			}
 			returnCard.dispatch(vectorOfCardsToReturn);
+			removeToSwipe = false;
 		}
 		
 		public function initTurn():void
@@ -226,6 +244,7 @@
 			_target = Game.getVectorOfPlayers()[randomIndex];
 			if(_target.getName() == name){
 				randomTarget();
+				return;
 			}
 			setActionTarget(_target);
 		}
@@ -239,6 +258,9 @@
 		
 		private function verifyCanDoAction(action:AAction):Boolean
 		{
+			if(action.getName() == Game.ACTION_CARD){
+				action.setCost(action.getCard().getAbilityCost());
+			}
 			var canDo:Boolean;
 			if(action.getCost() == 0){
 				canDo = true;
@@ -289,32 +311,39 @@
 				doTurnAction(turnAction);
 				cardChoosed.dispatch(turnAction);
 			}else if(status == STATUS_DEFENSIVE){
-				actionResponse.setCard(card);
+				//verifica se carta escolhida é counter da que esta atacando
+				var cardCountersTo:Array = card.getArrayOfCountersTo();
+				var nameToCompar:String;
 				
-				doDefensiveAction(actionResponse);
-				cardChoosed.dispatch(actionResponse);
+				if(turnAction.getName() == Game.ACTION_CARD){
+					nameToCompar = turnAction.getCard().getName();
+				}else{
+					nameToCompar = turnAction.getName();
+				}
+				
+				if(cardCountersTo != null){
+					for(var i:int = 0; i<cardCountersTo.length; i++){
+						if(cardCountersTo[i] == nameToCompar){
+							//é counter
+							actionResponse.setCard(card);
+				
+							cardChoosed.dispatch(actionResponse);
+							doDefensiveAction(actionResponse);
+							return;
+						}
+						
+					}
+					//não é counter escolhe outro
+					chooseCardAbility();
+				}else{
+					//não é counter escolhe outro
+					chooseCardAbility();
+				}
 			}
 		}
 		
 		public function doAction(action:AAction):void
 		{
-			/*switch(action.getName()){
-				case Game.ACTION_CARD:
-					doCardAbility.dispatch();
-					break;
-				case Game.ACTION_COUP:
-					doCoup.dispatch();
-					break;
-				case Game.ACTION_FOREIGN_AID:
-					doForeignAid.dispatch();
-					break;
-				case Game.ACTION_INCOME:
-					doIncome.dispatch();
-					break;
-				default:
-					doIncome.dispatch();
-					break;
-			}*/
 			status = STATUS_DEFENSIVE;
 			doingAction.dispatch(action);
 		}
@@ -341,6 +370,7 @@
 		
 		public function receiveAction(action:AAction):void
 		{
+			turnAction = action;
 			chooseAction();
 			//responseAction.dispatch(actionResponse);
 		}
@@ -352,13 +382,31 @@
 			switch(targetResponse){
 				case Game.ACTION_ACCEPT:
 					//doAction(turnAction);
+					//segue vida e verificacao
 					break;
 				case Game.ACTION_NOT_ACCEPT:
 					//verifica se a acao for contestada acontece algo
+					chooseCardToShow();
 					break;
 				case Game.ACTION_CARD:
 					//escolhe se aceita a acao ou nao
 					break;
+			}
+		}
+		
+		private function chooseCardToShow():void
+		{
+			//terminar
+			switch(Game.AI_TYPE){
+				case Game.AI_PERCENT:
+					percentAction();
+					break;
+				case Game.AI_RANDOM:
+					randomAction();
+					break;
+				default :
+					randomAction();
+				break;
 			}
 		}
 		

@@ -23,6 +23,9 @@
 		private var coinsToBuy:int;
 		private var loader:Loader;
 		private var image:Bitmap;
+		private var abilityCost:int;
+		private var counterTo:String;
+		private var arrayOfCountersTo:Array;
 		
 		public function ACard()
 		{
@@ -31,9 +34,18 @@
 		public function initialize():void
 		{
 			canUseAbility = true;
-			coinsToBuy = 1;
+			//coinsToBuy = 1;
 			
 			loadImage();
+			verifyCounterTo();
+		}
+		
+		private function verifyCounterTo():void
+		{
+			var tempString:String = counterTo;
+			var tempArray:Array;
+			tempArray = counterTo.split(",");
+			arrayOfCountersTo = tempArray;
 		}
 		
 		private function loadImage():void
@@ -135,6 +147,36 @@
 		public function setMandatoryTarget(value:Boolean):void
 		{
 			mandatoryTarget = value;
+		}
+		
+		public function getAbilityCost():int
+		{
+			return abilityCost;
+		}
+		
+		public function setAbilityCost(value:int):void
+		{
+			abilityCost = value;
+		}
+		
+		public function getCounterTo():String
+		{
+			return counterTo;
+		}
+		
+		public function setCounterTo(value:String):void
+		{
+			counterTo = value;
+		}
+		
+		public function getArrayOfCountersTo():Array
+		{
+			return arrayOfCountersTo;
+		}
+		
+		public function setArrayOfCountersTo(value:Array):void
+		{
+			arrayOfCountersTo = value;
 		}
 	}
 }
