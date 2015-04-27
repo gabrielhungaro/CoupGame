@@ -45,6 +45,7 @@
 		protected var STATUS_ON_TURN:String = "onTurn";
 		protected var STATUS_DEFENSIVE:String = "defensive";
 		protected var STATUS_WAINTING:String = "waiting";
+		private var swipingCards:Boolean;
 		
 		public function APlayer()
 		{
@@ -92,44 +93,65 @@
 			}
 		}
 		
+		public function chooseCardToSwipe(_numberOfCards:int):void
+		{
+			for (var i:int = 0; i < _numberOfCards; i++) 
+			{
+				switch(Game.AI_TYPE){
+					case Game.AI_PERCENT:
+						
+						break;
+					case Game.AI_RANDOM:
+						//randomHandsCard();
+						removeRandomCard();
+						break;
+					default :
+						//randomHandsCard();
+						removeRandomCard();
+						break;
+				}
+			}
+		}
+		
 		private function removeRandomCard():void
 		{
-			/*var card:ACard;
-			var cardId:int = Math.floor(Math.random() * vectorOfCards.length); 
-			card = vectorOfCards[cardId]; 
-			vectorOfCards.splice(cardId, 1);
-			return card;*/
-			var card:ACard = chooseRandomCardOfHand();
+			var card:ACard;
+			vectorOfRemovedCards = new Vector.<ACard>();
+			var cardId:int = Math.floor(Math.random() * vectorOfCards.length);
+			card = vectorOfCards[cardId];
 			removeCard(card);
 		}
 		
-		private functon removeCard(card:ACard):void
+		public function removeCard(card:ACard):void
 		{
 			vectorOfRemovedCards.push(card);
 			vectorOfCards.splice(vectorOfCards.indexOf(card),1);
-			cardRemoved.dispatch();
+			if(swipingCards == true){
+				choosedCardsToSwipe();
+			}else{
+				cardRemoved.dispatch();
+			}
 		}
 		
-		private function chooseRandomCardOfHand():ACard
-		{
-			vectorOfRemovedCards = [];
-			var card:ACard;
-			var cardId:int = Math.floor(Math.random() * vectorOfCards.length); 
-			card = vectorOfCards[cardId];
-			return card;
-		}
-		
-		public function swipeCards(_numberOfCardsToReturn:int):void
+		public function swipeCards(_numberOfCardsToSwipe:int):void
 		{
 			//arrumar swipe
-			removeToSwipe = true;
+			swipingCards = true;
 			var vectorOfCardsToReturn:Vector.<ACard> = new Vector.<ACard>();
-			for(var i:int = 0; i < _numberOfCardsToReturn; i++){
-				this.chooseCardToRemove()
+			this.chooseCardToSwipe(_numberOfCardsToSwipe);
+			for(var i:int = 0; i < _numberOfCardsToSwipe; i++){
 				vectorOfCardsToReturn.push(vectorOfRemovedCards[i]);
 			}
 			returnCard.dispatch(vectorOfCardsToReturn);
-			removeToSwipe = false;
+			swipingCards = false;
+		}
+		
+		private function choosedCardsToSwipe():void
+		{
+			if(vectorOfRemovedCards){
+				// TODO Auto Generated method stub
+			}
+			
 		}
 		
 		public function initTurn():void

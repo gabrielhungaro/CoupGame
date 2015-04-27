@@ -22,6 +22,7 @@
 		private var turnInterface:Sprite;
 		private var defensiveInterface:Sprite;
 		private var chooseCardInterface:Sprite;
+		private var chooseHandsCardInterface:Sprite;
 		private var chooseActionTargetInterface:Sprite;
 		
 		private var cardFactory:CardFactory;
@@ -392,8 +393,8 @@
 		
 		private function removeChooseActionTargetInterface():void
 		{
-			this.removeChild(chooseChooseActionTargetInterface);
-			chooseChooseActionTargetInterface = null;
+			this.removeChild(chooseActionTargetInterface);
+			chooseActionTargetInterface = null;
 		}
 		
 		private function showChooseHandsCardInterface(player:APlayer):void
@@ -410,7 +411,7 @@
 				cardBtn.graphics.drawRect(0,00,100,50);
 				cardBtn.graphics.endFill();
 				cardBtn.name = player.getVectorOfCards()[i].getName();
-				chooseChooseActionTargetInterface.addChild(cardBtn);
+				chooseHandsCardInterface.addChild(cardBtn);
 				
 				var btnName:TextField = new TextField();
 				btnName.text = cardBtn.name;
@@ -428,7 +429,20 @@
 		private function onClickHandsCard(event:MouseEvent):void
 		{
 			//fazer isso
-			player.removeCard()
+			//player.removeCard()
+			var cardName:String = event.currentTarget.name;
+			if(turnType == TURN_ACTIVE){
+				turnPlayer.removeCard(cardFactory.getCardByName(cardName));
+			}else if(turnType == TURN_DEFENSIVE){
+				turnTarget.removeCard(cardFactory.getCardByName(cardName));
+			}
+			removeChooseHandsCardInterface();
+		}
+		
+		private function removeChooseHandsCardInterface():void
+		{
+			this.removeChild(chooseHandsCardInterface);
+			chooseHandsCardInterface = null;
 		}
 		
 		private function onMouseOver(event:MouseEvent):void

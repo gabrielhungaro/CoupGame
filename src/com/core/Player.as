@@ -1,5 +1,7 @@
 ﻿package com.core
 {
+	import com.cards.ACard;
+	
 	import org.osflash.signals.Signal;
 
 	public class Player extends APlayer
@@ -41,9 +43,9 @@
 			super.doDefensiveAction(action);
 		}
 		
-		override public function chooseCardToRemove(withCallback:Boolean):ACard
+		override public function chooseCardToRemove():void
 		{
-			vectorOfRemovedCards = [];
+			vectorOfRemovedCards = new Vector.<ACard>();
 			showChooseHandsCardInterface.dispatch(this);
 		}
 	}
