@@ -19,6 +19,7 @@
 		protected var vectorOfTurnActions:Vector.<AAction>;
 		protected var vectorOfDefensiveActions:Vector.<AAction>;
 		public var vectorOfRemovedCards:Vector.<ACard>;
+		protected var vectorOfCardsToExchange:Vector.<ACard>;
 		
 		protected var turnAction:AAction;
 		protected var actionTarget:APlayer;
@@ -31,7 +32,7 @@
 		public var waitingActionResponse:Signal = new Signal();
 		public var responseAction:Signal = new Signal();
 		public var endTurn:Signal = new Signal();
-		public var returnCard:Signal = new Signal();
+		public var exchangeCard:Signal = new Signal();
 		public var doingAction:Signal = new Signal;
 		public var cardRemoved:Signal = new Signal();
 		
@@ -45,7 +46,8 @@
 		protected var STATUS_ON_TURN:String = "onTurn";
 		protected var STATUS_DEFENSIVE:String = "defensive";
 		protected var STATUS_WAINTING:String = "waiting";
-		private var swipingCards:Boolean;
+		protected var exchangingCards:Boolean;
+		protected var numberOfCardsToExchange:int;
 		
 		public function APlayer()
 		{
@@ -53,6 +55,7 @@
 		
 		public function initialize():void
 		{
+			numberOfCardsToExchange = Game.getNumberCardsToEnxchange();
 			status = STATUS_DEFENSIVE;
 			vectorOfCards = new Vector.<ACard>();
 			vectorOfTurnActions = new Vector.<AAction>();
@@ -80,6 +83,7 @@
 		
 		public function chooseCardToRemove():void
 		{
+			vectorOfRemovedCards = new Vector.<ACard>();
 			switch(Game.AI_TYPE){
 				case Game.AI_PERCENT:
 					
@@ -93,9 +97,15 @@
 			}
 		}
 		
-		public function chooseCardToSwipe(_numberOfCards:int):void
+		public function chooseCardToExchange():void
 		{
-			for (var i:int = 0; i < _numberOfCards; i++) 
+			exchangingCards = true;
+			vectorOfCardsToExchange = null;
+			vectorOfCardsToExchange = new Vector.<ACard>();
+			vectorOfRemovedCards = null;
+			vectorOfRemovedCards = new Vector.<ACard>();
+			
+			for (var i:int = 0; i < numberOfCardsToExchange; i++) 
 			{
 				switch(Game.AI_TYPE){
 					case Game.AI_PERCENT:
@@ -116,7 +126,6 @@
 		private function removeRandomCard():void
 		{
 			var card:ACard;
-			vectorOfRemovedCards = new Vector.<ACard>();
 			var cardId:int = Math.floor(Math.random() * vectorOfCards.length);
 			card = vectorOfCards[cardId];
 			removeCard(card);
@@ -126,32 +135,24 @@
 		{
 			vectorOfRemovedCards.push(card);
 			vectorOfCards.splice(vectorOfCards.indexOf(card),1);
-			if(swipingCards == true){
-				choosedCardsToSwipe();
+			if(exchangingCards == true){
+				if(vectorOfRemovedCards.length == numberOfCardsToExchange){
+					exchangeCards();
+				}
 			}else{
 				cardRemoved.dispatch();
 			}
 		}
 		
-		public function swipeCards(_numberOfCardsToSwipe:int):void
-		{
-			//arrumar swipe
-			swipingCards = true;
-			var vectorOfCardsToReturn:Vector.<ACard> = new Vector.<ACard>();
-			this.chooseCardToSwipe(_numberOfCardsToSwipe);
-			for(var i:int = 0; i < _numberOfCardsToSwipe; i++){
-				vectorOfCardsToReturn.push(vectorOfRemovedCards[i]);
-			}
-			returnCard.dispatch(vectorOfCardsToReturn);
-			swipingCards = false;
-		}
-		
-		private function choosedCardsToSwipe():void
+		private function exchangeCards():void
 		{
 			if(vectorOfRemovedCards){
-				// TODO Auto Generated method stub
+				for(var i:int = 0; i < numberOfCardsToExchange; i++){
+					vectorOfCardsToExchange.push(vectorOfRemovedCards[i]);
+				}
 			}
-			
+			exchangeCard.dispatch(vectorOfCardsToExchange);
+			exchangingCards = false;
 		}
 		
 		public function initTurn():void
@@ -399,9 +400,7 @@
 		
 		public function receiveResponse(_response:AAction):void
 		{
-			var targetResponse:AAction = actionTarget.getActionResponse();
-			
-			switch(targetResponse){
+			switch(_response){
 				case Game.ACTION_ACCEPT:
 					//doAction(turnAction);
 					//segue vida e verificacao

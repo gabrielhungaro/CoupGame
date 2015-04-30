@@ -13,6 +13,7 @@
 		private static var initialCoins:int = 2;
 		private static var coinsPerIncome:int = 1;
 		private static var coinsPerForeignAid:int = 2;
+		private static var numberCardsToEnxchange:int = 2;
 		private static var player:APlayer;
 		private static var frameRate:Number;
 		private static var timeForResponse:int = 10;
@@ -173,6 +174,16 @@
 		public static function setVectorOfDefensiveCards(value:Vector.<ACard>):void
 		{
 			vectorOfDefensiveCards = value;
+		}
+
+		public static function getNumberCardsToEnxchange():int
+		{
+			return numberCardsToEnxchange;
+		}
+
+		public static function setNumberCardsToEnxchange(value:int):void
+		{
+			numberCardsToEnxchange = value;
 		}
 
 

@@ -48,5 +48,16 @@
 			vectorOfRemovedCards = new Vector.<ACard>();
 			showChooseHandsCardInterface.dispatch(this);
 		}
+		
+		override public function chooseCardToExchange():void
+		{
+			exchangingCards = true;
+			vectorOfCardsToExchange = null;
+			vectorOfCardsToExchange = new Vector.<ACard>();
+			vectorOfRemovedCards = null;
+			vectorOfRemovedCards = new Vector.<ACard>();
+			
+			showChooseHandsCardInterface.dispatch(this);
+		}
 	}
 }

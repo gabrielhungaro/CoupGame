@@ -50,6 +50,7 @@
 		private var turnType:String;
 		private var TURN_ACTIVE:String =  "active";
 		private var TURN_DEFENSIVE:String = "defensive";
+		private var choosedCards:int;
 		
 		public function GameState()
 		{
@@ -122,7 +123,7 @@
 				vectorOfPlayers[i].responseAction.add(receiveActionResponse);
 				vectorOfPlayers[i].cardChoosed.add(cardChoosed);
 				vectorOfPlayers[i].doingAction.add(doAction);
-				vectorOfPlayers[i].returnCard.add(returnedCard);
+				vectorOfPlayers[i].exchangeCard.add(exchangedCard);
 				vectorOfPlayers[i].cardRemoved.add(cardRemoved);
 				if(vectorOfPlayers[i] is Player){
 					(vectorOfPlayers[i] as Player).showChooseActionInterface.add(showTurnInterface);
@@ -181,7 +182,7 @@
 		{
 			calculateturnPlayer();
 			turnResponseId = turnPlayerId+1;
-			trace("player turn: " + turnPlayerId + " " + vectorOfPlayers[turnPlayerId].getName());
+			//trace("player turn: " + turnPlayerId + " " + vectorOfPlayers[turnPlayerId].getName());
 			turnPlayer = vectorOfPlayers[turnPlayerId];
 			turnType = TURN_ACTIVE;
 			if(turnPlayer.getIsAI()){
@@ -430,11 +431,22 @@
 		{
 			//fazer isso
 			//player.removeCard()
+			choosedCards++;
 			var cardName:String = event.currentTarget.name;
 			if(turnType == TURN_ACTIVE){
 				turnPlayer.removeCard(cardFactory.getCardByName(cardName));
 			}else if(turnType == TURN_DEFENSIVE){
 				turnTarget.removeCard(cardFactory.getCardByName(cardName));
+			}
+			if(turnAction.getName() == Game.ACTION_CARD){
+				if(turnAction.getCard().getName() == CardConstants.EMBAIXADOR){
+					if(choosedCards == Game.getNumberCardsToEnxchange()){
+						removeChooseHandsCardInterface();
+					}else{
+						//choose another
+						return;
+					}
+				}
 			}
 			removeChooseHandsCardInterface();
 		}
@@ -567,6 +579,18 @@
 			changeTurn();
 		}
 		
+		public function getVectorOfDefensiveCardByAction(action:AAction):Vector.<ACard>
+		{
+			var vectorOfDesenfiveCardByAction:Vector.<ACard>;
+			var card:ACard;
+			for(card in vectorOfCards){
+				if(card.getCounterTo() == action.getName()){
+					vectorOfDesenfiveCardByAction.push(card);
+				}
+			}
+			return vectorOfDesenfiveCardByAction;
+		}
+		
 		public override function update():void
 		{
 			super.update();
@@ -607,6 +631,9 @@
 		private function getNextPlayerToResponse():APlayer
 		{
 			var nextPlayer:APlayer;
+			if(turnResponseId == vectorOfPlayers.length){
+				turnResponseId = 0;
+			}
 			nextPlayer = vectorOfPlayers[turnResponseId];
 			return nextPlayer;
 		}
@@ -653,7 +680,7 @@
 						turnPlayer.addCard(vectorOfCards[0]);
 						vectorOfCards.splice(0, 1);
 					}
-					turnPlayer.swipeCards(2);
+					turnPlayer.chooseCardToExchange();
 				break;
 			}
 		}
@@ -663,10 +690,10 @@
 			endTurn();
 		}
 		
-		private function returnedCard(vectorOfCardsToReturn:Vector.<ACard>):void
+		private function exchangedCard(vectorOfCardsToExchange:Vector.<ACard>):void
 		{
-			for(var i:int = 0; i < vectorOfCardsToReturn.length; i++){
-				vectorOfCards.push(vectorOfCardsToReturn[0]);
+			for(var i:int = 0; i < vectorOfCardsToExchange.length; i++){
+				vectorOfCards.push(vectorOfCardsToExchange[i]);
 			}
 			shuffleCards();
 			endTurn();
